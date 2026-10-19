@@ -285,3 +285,4 @@ tests/test_pipeline_e2e.py::test_full_pipeline_end_to_end PASSED         [100%]
 
 - **License**: MIT License. Pretrained YOLO weights licensed under AGPL-3.0 by Ultralytics.
 - **Surveillance Notice**: VisionGuard is designed for vehicular traffic volume intelligence. It does not perform facial recognition, individual human identification, or automated license plate extraction.
+

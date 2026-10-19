@@ -1,5 +1,5 @@
 # Multi-stage Dockerfile for VisionGuard React Frontend
-FROM node:22-alpine as build
+FROM node:22-alpine AS build
 
 WORKDIR /app
 
@@ -37,3 +37,4 @@ RUN printf 'server {\n\
 EXPOSE 80
 
 CMD ["nginx", "-g", "daemon off;"]
+

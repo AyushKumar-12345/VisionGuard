@@ -1,5 +1,5 @@
 # Multi-stage Dockerfile for VisionGuard Backend
-FROM python:3.12-slim as builder
+FROM python:3.12-slim AS builder
 
 # Install system dependencies required for OpenCV, Git, and build tools
 RUN apt-get update && apt-get install -y --no-install-recommends \
@@ -19,7 +19,7 @@ RUN pip install --no-cache-dir --upgrade pip && \
     pip install --no-cache-dir -r requirements.txt
 
 # Final runtime image
-FROM python:3.12-slim as runner
+FROM python:3.12-slim AS runner
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
     libgl1 \
@@ -30,7 +30,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 
 WORKDIR /app
 
-# Copy installed wheels and binaries from builder
+# Copy installed wheels and binaries from builder stage
 COPY --from=builder /usr/local/lib/python3.12/site-packages /usr/local/lib/python3.12/site-packages
 COPY --from=builder /usr/local/bin /usr/local/bin
 
