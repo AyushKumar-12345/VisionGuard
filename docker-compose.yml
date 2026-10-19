@@ -1,0 +1,54 @@
+version: '3.8'
+
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: visionguard-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-visionguard}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-visionguard_secret}
+      POSTGRES_DB: ${POSTGRES_DB:-visionguard}
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-visionguard}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  backend:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+    container_name: visionguard-backend
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      - DATABASE_URL=postgresql+asyncpg://${POSTGRES_USER:-visionguard}:${POSTGRES_PASSWORD:-visionguard_secret}@db:5432/${POSTGRES_DB:-visionguard}
+      - SYNC_DATABASE_URL=postgresql://${POSTGRES_USER:-visionguard}:${POSTGRES_PASSWORD:-visionguard_secret}@db:5432/${POSTGRES_DB:-visionguard}
+      - DEBUG=False
+      - CPU_INFERENCE_THREADS=8
+      - MAX_CONCURRENT_JOBS=1
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./data:/app/data
+
+  frontend:
+    build:
+      context: .
+      dockerfile: frontend/Dockerfile
+    container_name: visionguard-frontend
+    restart: unless-stopped
+    depends_on:
+      - backend
+    ports:
+      - "3000:80"
+
+volumes:
+  pgdata:

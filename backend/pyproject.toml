@@ -1,0 +1,26 @@
+[project]
+name = "visionguard-backend"
+version = "1.0.0"
+description = "VisionGuard — Multi-Model Traffic Intelligence and Vehicle Analytics API"
+requires-python = ">=3.12"
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+
+[tool.ruff.lint]
+select = [
+    "E",   # pycodestyle errors
+    "W",   # pycodestyle warnings
+    "F",   # pyflakes
+    "I",   # isort
+    "C4",  # flake8-comprehensions
+    "UP",  # pyupgrade
+]
+ignore = [
+    "E501", # line too long (handled by formatter)
+    "F821", # undefined name (SQLAlchemy Mapped string forward-references)
+]
+
+[tool.ruff.lint.isort]
+known-first-party = ["app"]
