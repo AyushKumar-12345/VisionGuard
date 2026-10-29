@@ -1,0 +1,7 @@
+node_modules
+dist
+.npm
+.yarn
+*.log
+.DS_Store
+

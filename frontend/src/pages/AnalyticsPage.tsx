@@ -2,8 +2,9 @@ import React, { useEffect, useState } from 'react';
 import {
   AlertTriangle,
   BarChart2,
-  Car,
-  PieChart as PieIcon
+  PieChart as PieIcon,
+  TrendingDown,
+  TrendingUp
 } from 'lucide-react';
 import {
   Bar,
@@ -21,7 +22,15 @@ import {
 import { ClassDistributionItem } from '../types';
 import { getClassDistribution } from '../api/client';
 
-const COLORS = ['#0f172a', '#3b82f6', '#10b981', '#f59e0b', '#8b5cf6'];
+// Rich, high-saturation color palette
+const RICH_PALETTE = [
+  '#2563EB', // Electric Royal Blue
+  '#059669', // Emerald Green
+  '#7C3AED', // Royal Purple
+  '#D97706', // Vivid Amber
+  '#E11D48', // Crimson Rose
+  '#0891B2', // Electric Cyan
+];
 
 export const AnalyticsPage: React.FC = () => {
   const [distribution, setDistribution] = useState<ClassDistributionItem[]>([]);
@@ -44,22 +53,27 @@ export const AnalyticsPage: React.FC = () => {
   }, []);
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-8 bg-white text-black">
       {/* Header */}
-      <div className="pb-2 border-b border-zinc-200">
-        <h1 className="text-2xl font-extrabold text-zinc-950 tracking-tight">
+      <div className="pb-6 border-b-2 border-zinc-200">
+        <div className="flex items-center gap-2 mb-1">
+          <span className="px-2.5 py-0.5 rounded-full text-[11px] font-black uppercase tracking-wider bg-emerald-100 text-emerald-800 border border-emerald-300">
+            Spatial Flow & Taxonomy
+          </span>
+        </div>
+        <h1 className="text-3xl font-black text-black tracking-tight">
           Traffic Analytics & Spatial Volume
         </h1>
-        <p className="text-sm text-zinc-600 mt-1">
-          Aggregated vehicle taxonomy, class volume distribution, and directional movement breakdown across tracked sessions.
+        <p className="text-sm font-semibold text-zinc-700 mt-1 max-w-3xl">
+          Aggregated vehicle taxonomy, class volume distribution, and directional movement breakdown across tracked surveillance sessions.
         </p>
       </div>
 
       {/* Camera Calibration Disclaimer Alert */}
-      <div className="p-4 rounded-xl bg-zinc-50 border border-zinc-200 flex items-start gap-3">
-        <AlertTriangle className="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5" />
-        <div className="text-xs text-zinc-700 leading-relaxed">
-          <span className="font-bold text-zinc-950">Technical Accuracy & Speed Calibration Notice: </span>
+      <div className="p-5 rounded-2xl bg-amber-50/70 border-2 border-amber-300 flex items-start gap-3.5 shadow-xs">
+        <AlertTriangle className="w-5 h-5 text-amber-700 flex-shrink-0 mt-0.5" />
+        <div className="text-xs text-amber-950 leading-relaxed font-semibold">
+          <span className="font-black text-amber-950">Technical Accuracy & Speed Calibration Notice: </span>
           Monocular surveillance cameras suffer from projective distortion and lack physical ground-plane depth.
           VisionGuard strictly avoids fabricating arbitrary speed estimates (km/h) unless calibrated with 4-point homography matrix mapping against physical road markers.
         </div>
@@ -68,50 +82,78 @@ export const AnalyticsPage: React.FC = () => {
       {/* Visual Analytics Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Class Breakdown Bar Chart */}
-        <div className="bg-white p-6 rounded-xl border border-zinc-200 shadow-sm space-y-4">
-          <div className="flex items-center gap-2">
-            <BarChart2 className="w-5 h-5 text-zinc-900" />
-            <h2 className="text-base font-bold text-zinc-950">Vehicle Volume by Class</h2>
+        <div className="bg-white p-7 rounded-2xl border-2 border-zinc-200 shadow-sm space-y-4">
+          <div className="flex items-center justify-between pb-3 border-b-2 border-zinc-100">
+            <div className="flex items-center gap-2.5">
+              <div className="p-2 rounded-lg bg-blue-100 text-blue-800">
+                <BarChart2 className="w-4 h-4" />
+              </div>
+              <h2 className="text-base font-black text-black">Vehicle Volume by Taxonomy</h2>
+            </div>
+            <span className="text-xs font-black px-2.5 py-1 rounded-md bg-blue-50 text-blue-700 border border-blue-200 font-mono">
+              Total: {totalVehicles}
+            </span>
           </div>
-          <div className="h-72 w-full">
+
+          <div className="h-72 w-full pt-2">
             {loading ? (
-              <div className="h-full flex items-center justify-center text-xs text-zinc-400">
+              <div className="h-full flex items-center justify-center text-xs font-bold text-zinc-400">
                 Loading analytics data...
               </div>
             ) : distribution.length === 0 ? (
-              <div className="h-full flex items-center justify-center text-xs text-zinc-400">
+              <div className="h-full flex items-center justify-center text-xs font-bold text-zinc-500">
                 No tracked vehicles recorded yet. Run a video analysis to see analytics.
               </div>
             ) : (
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={distribution} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
-                  <XAxis dataKey="class_name" stroke="#64748b" fontSize={11} tickLine={false} />
-                  <YAxis stroke="#64748b" fontSize={11} tickLine={false} />
+                  <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
+                  <XAxis dataKey="class_name" stroke="#000000" fontSize={11} fontWeight={700} tickLine={false} />
+                  <YAxis stroke="#000000" fontSize={11} fontWeight={700} tickLine={false} />
                   <Tooltip
-                    contentStyle={{ backgroundColor: '#ffffff', borderColor: '#e2e8f0', borderRadius: '8px', fontSize: '12px' }}
+                    contentStyle={{
+                      backgroundColor: '#ffffff',
+                      border: '2px solid #000000',
+                      borderRadius: '12px',
+                      fontSize: '12px',
+                      fontWeight: 'bold',
+                      color: '#000000',
+                      boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)',
+                    }}
                   />
-                  <Bar dataKey="count" fill="#0f172a" radius={[4, 4, 0, 0]} />
+                  <Bar dataKey="count" radius={[6, 6, 0, 0]}>
+                    {distribution.map((_, index) => (
+                      <Cell key={`cell-${index}`} fill={RICH_PALETTE[index % RICH_PALETTE.length]} />
+                    ))}
+                  </Bar>
                 </BarChart>
               </ResponsiveContainer>
             )}
           </div>
         </div>
 
-        {/* Class Distribution Pie Chart */}
-        <div className="bg-white p-6 rounded-xl border border-zinc-200 shadow-sm space-y-4">
-          <div className="flex items-center gap-2">
-            <PieIcon className="w-5 h-5 text-zinc-900" />
-            <h2 className="text-base font-bold text-zinc-950">Vehicle Class Share (%)</h2>
+        {/* Vehicle Share Donut Chart */}
+        <div className="bg-white p-7 rounded-2xl border-2 border-zinc-200 shadow-sm space-y-4">
+          <div className="flex items-center justify-between pb-3 border-b-2 border-zinc-100">
+            <div className="flex items-center gap-2.5">
+              <div className="p-2 rounded-lg bg-purple-100 text-purple-800">
+                <PieIcon className="w-4 h-4" />
+              </div>
+              <h2 className="text-base font-black text-black">Class Proportion Breakdown</h2>
+            </div>
+            <span className="text-xs font-black px-2.5 py-1 rounded-md bg-purple-50 text-purple-700 border border-purple-200">
+              Taxonomy Mix
+            </span>
           </div>
-          <div className="h-72 w-full">
+
+          <div className="h-72 w-full pt-2 flex items-center justify-center">
             {loading ? (
-              <div className="h-full flex items-center justify-center text-xs text-zinc-400">
-                Loading share data...
+              <div className="h-full flex items-center justify-center text-xs font-bold text-zinc-400">
+                Loading analytics data...
               </div>
             ) : distribution.length === 0 ? (
-              <div className="h-full flex items-center justify-center text-xs text-zinc-400">
-                No class data available.
+              <div className="h-full flex items-center justify-center text-xs font-bold text-zinc-500">
+                No tracked vehicles recorded yet.
               </div>
             ) : (
               <ResponsiveContainer width="100%" height="100%">
@@ -122,16 +164,29 @@ export const AnalyticsPage: React.FC = () => {
                     nameKey="class_name"
                     cx="50%"
                     cy="50%"
-                    outerRadius={80}
-                    label={({ class_name, percentage }) => `${class_name} (${percentage}%)`}
-                    labelLine={false}
+                    innerRadius={55}
+                    outerRadius={85}
+                    paddingAngle={4}
                   >
                     {distribution.map((_, index) => (
-                      <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                      <Cell key={`pie-cell-${index}`} fill={RICH_PALETTE[index % RICH_PALETTE.length]} />
                     ))}
                   </Pie>
-                  <Tooltip />
-                  <Legend />
+                  <Tooltip
+                    contentStyle={{
+                      backgroundColor: '#ffffff',
+                      border: '2px solid #000000',
+                      borderRadius: '12px',
+                      fontSize: '12px',
+                      fontWeight: 'bold',
+                      color: '#000000',
+                    }}
+                  />
+                  <Legend
+                    verticalAlign="bottom"
+                    height={36}
+                    formatter={(value) => <span className="text-xs font-bold text-black">{value}</span>}
+                  />
                 </PieChart>
               </ResponsiveContainer>
             )}
@@ -139,43 +194,29 @@ export const AnalyticsPage: React.FC = () => {
         </div>
       </div>
 
-      {/* Class Statistics Table */}
-      <div className="bg-white rounded-xl border border-zinc-200 shadow-sm overflow-hidden">
-        <div className="px-6 py-4 border-b border-zinc-200 flex items-center justify-between">
-          <h2 className="text-base font-bold text-zinc-950">Detailed Class Breakdown Summary</h2>
-          <span className="text-xs font-semibold px-2.5 py-1 rounded bg-zinc-100 text-zinc-800">
-            {totalVehicles.toLocaleString()} Total Unique Vehicles
-          </span>
+      {/* Directional Movement Summary Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="bg-white p-6 rounded-2xl border-2 border-zinc-200 border-t-4 border-t-emerald-600 shadow-sm flex items-center justify-between">
+          <div className="space-y-1">
+            <span className="text-xs font-black uppercase tracking-wider text-zinc-600">Inbound Vehicle Corridor</span>
+            <div className="text-3xl font-black text-emerald-800">Normal Flow Pattern</div>
+            <p className="text-xs font-semibold text-zinc-600">Tracked vector cross-product heading north/inward</p>
+          </div>
+          <div className="p-4 rounded-2xl bg-emerald-100 text-emerald-700 shadow-sm">
+            <TrendingUp className="w-8 h-8" />
+          </div>
         </div>
-        <table className="w-full text-left text-xs">
-          <thead className="bg-zinc-50 text-zinc-600 font-semibold border-b border-zinc-200">
-            <tr>
-              <th className="px-6 py-3">Vehicle Class</th>
-              <th className="px-6 py-3">Tracked Count</th>
-              <th className="px-6 py-3">Percentage Share</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-zinc-200 text-zinc-800">
-            {distribution.length === 0 ? (
-              <tr>
-                <td colSpan={3} className="px-6 py-6 text-center text-zinc-500">
-                  No data available yet.
-                </td>
-              </tr>
-            ) : (
-              distribution.map((item) => (
-                <tr key={item.class_name} className="hover:bg-zinc-50">
-                  <td className="px-6 py-3 font-semibold text-zinc-950 capitalize flex items-center gap-2">
-                    <Car className="w-4 h-4 text-zinc-400" />
-                    <span>{item.class_name}</span>
-                  </td>
-                  <td className="px-6 py-3 font-medium">{item.count.toLocaleString()}</td>
-                  <td className="px-6 py-3 font-medium">{item.percentage}%</td>
-                </tr>
-              ))
-            )}
-          </tbody>
-        </table>
+
+        <div className="bg-white p-6 rounded-2xl border-2 border-zinc-200 border-t-4 border-t-amber-500 shadow-sm flex items-center justify-between">
+          <div className="space-y-1">
+            <span className="text-xs font-black uppercase tracking-wider text-zinc-600">Outbound Vehicle Corridor</span>
+            <div className="text-3xl font-black text-amber-900">Egress Flow Pattern</div>
+            <p className="text-xs font-semibold text-zinc-600">Tracked vector cross-product heading south/outward</p>
+          </div>
+          <div className="p-4 rounded-2xl bg-amber-100 text-amber-700 shadow-sm">
+            <TrendingDown className="w-8 h-8" />
+          </div>
+        </div>
       </div>
     </div>
   );

@@ -1,3 +1,4 @@
+import os
 from pathlib import Path
 
 from pydantic import Field
@@ -22,9 +23,13 @@ class Settings(BaseSettings):
     ALLOWED_ORIGINS: list[str] = [
         "http://localhost:5173",
         "http://127.0.0.1:5173",
+        "http://localhost:5174",
+        "http://127.0.0.1:5174",
         "http://localhost:3000",
         "http://localhost:8000",
-        "http://127.0.0.1:8000"
+        "http://127.0.0.1:8000",
+        "http://localhost:8001",
+        "http://127.0.0.1:8001",
     ]
 
     # Database: Supports async PostgreSQL or async SQLite fallback
@@ -37,9 +42,20 @@ class Settings(BaseSettings):
         description="Sync database connection string for Alembic migrations"
     )
 
-    # Storage Paths (resolved relative to workspace root)
-    BASE_DIR: Path = Path(__file__).resolve().parent.parent.parent.parent
-    DATA_DIR: Path = BASE_DIR / "data"
+    # Storage Paths (resolved relative to workspace root or DATA_DIR environment variable)
+    DATA_DIR: Path = (
+        Path(os.environ["DATA_DIR"])
+        if "DATA_DIR" in os.environ
+        else (
+            Path(__file__).resolve().parent.parent.parent.parent / "data"
+            if (Path(__file__).resolve().parent.parent.parent.parent / "data").exists()
+            else (
+                Path(__file__).resolve().parent.parent.parent / "data"
+                if (Path(__file__).resolve().parent.parent.parent / "data").exists()
+                else Path("/app/data")
+            )
+        )
+    )
     UPLOAD_DIR: Path = DATA_DIR / "uploads"
     ANNOTATED_DIR: Path = DATA_DIR / "annotated"
     REPORTS_DIR: Path = DATA_DIR / "reports"

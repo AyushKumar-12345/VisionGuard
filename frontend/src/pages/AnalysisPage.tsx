@@ -16,14 +16,14 @@ import { createAnalysisJob, getJobResults, getJobStatus } from '../api/client';
 
 interface AnalysisPageProps {
   videos: VideoItem[];
-  models: ModelConfig[];
+  models?: ModelConfig[];
   selectedVideoId?: string;
   onRefresh: () => void;
 }
 
 export const AnalysisPage: React.FC<AnalysisPageProps> = ({
   videos,
-  models,
+  models: _models,
   selectedVideoId,
   onRefresh,
 }) => {
@@ -65,7 +65,6 @@ export const AnalysisPage: React.FC<AnalysisPageProps> = ({
         setJobDetail(statusData);
 
         if (statusData.status === 'COMPLETED') {
-          // Fetch complete aggregated results
           const fullResults = await getJobResults(activeJobId);
           setJobDetail(fullResults);
           onRefresh();
@@ -88,7 +87,7 @@ export const AnalysisPage: React.FC<AnalysisPageProps> = ({
 
   const handleLaunchJob = async () => {
     if (!videoId) {
-      setErrorMsg('Please select a video to analyze.');
+      setErrorMsg('Please select a video from the library to analyze.');
       return;
     }
 
@@ -121,75 +120,107 @@ export const AnalysisPage: React.FC<AnalysisPageProps> = ({
   const selectedVideo = videos.find((v) => v.id === videoId);
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-8 bg-white text-black">
       {/* Page Header */}
-      <div className="pb-2 border-b border-zinc-200">
-        <h1 className="text-2xl font-extrabold text-zinc-950 tracking-tight">
-          Video Analysis Pipeline & Video Player
+      <div className="pb-6 border-b-2 border-zinc-200">
+        <div className="flex items-center gap-2 mb-1">
+          <span className="px-2.5 py-0.5 rounded-full text-[11px] font-black uppercase tracking-wider bg-indigo-100 text-indigo-800 border border-indigo-300">
+            Inference & Tracking Engine
+          </span>
+          <span className="px-2.5 py-0.5 rounded-full text-[11px] font-black uppercase tracking-wider bg-emerald-100 text-emerald-800 border border-emerald-300">
+            ByteTrack Online Association
+          </span>
+        </div>
+        <h1 className="text-3xl font-black text-black tracking-tight">
+          Live Video Analysis Pipeline & Video Player
         </h1>
-        <p className="text-sm text-zinc-600 mt-1">
-          Configure detection parameters, set virtual counting tripwires, and execute real YOLO inference with ByteTrack multi-object tracking.
+        <p className="text-sm font-semibold text-zinc-700 mt-1 max-w-3xl">
+          Configure detection hyperparameters, position 2D vector virtual counting tripwires, execute anchor-free YOLO inference, and track vehicle trajectories in real time.
         </p>
       </div>
 
       {/* Configuration & Controls Section */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Left Column: Job Form */}
-        <div className="lg:col-span-1 bg-white p-6 rounded-xl border border-zinc-200 shadow-sm space-y-5">
-          <div className="flex items-center gap-2 pb-2 border-b border-zinc-100">
-            <Sliders className="w-5 h-5 text-zinc-950" />
-            <h2 className="text-base font-bold text-zinc-950">Inference Parameters</h2>
+        {/* Left Column: Job Configuration Panel */}
+        <div className="lg:col-span-1 bg-white p-6 rounded-2xl border-2 border-zinc-200 shadow-sm space-y-6">
+          <div className="flex items-center gap-2.5 pb-3 border-b-2 border-zinc-100">
+            <div className="p-2 rounded-lg bg-indigo-100 text-indigo-800">
+              <Sliders className="w-4 h-4" />
+            </div>
+            <div>
+              <h2 className="text-base font-black text-black">Pipeline Parameters</h2>
+              <p className="text-xs font-semibold text-zinc-600">Model, thresholds, and spatial line</p>
+            </div>
           </div>
 
           {/* Video Selector */}
           <div>
-            <label className="block text-xs font-semibold text-zinc-700 mb-1">
-              Select Video
+            <label className="block text-xs font-black uppercase tracking-wider text-black mb-1.5">
+              Target Surveillance Video
             </label>
             <select
               value={videoId}
               onChange={(e) => setVideoId(e.target.value)}
-              className="w-full text-xs font-medium px-3 py-2 rounded-lg bg-zinc-50 border border-zinc-300 text-zinc-900 focus:outline-none focus:ring-2 focus:ring-zinc-950"
+              className="w-full text-xs font-bold px-3 py-2.5 rounded-xl bg-white border-2 border-zinc-200 text-black focus:outline-none focus:border-indigo-600 focus:ring-2 focus:ring-indigo-100 shadow-xs"
             >
               {videos.map((v) => (
                 <option key={v.id} value={v.id}>
-                  {v.original_filename} ({v.total_frames} frames, {v.width}x{v.height})
+                  {v.original_filename} ({v.total_frames} frames, {v.width}&times;{v.height})
                 </option>
               ))}
             </select>
           </div>
 
-          {/* Model Selector */}
+          {/* Model Selector Cards */}
           <div>
-            <label className="block text-xs font-semibold text-zinc-700 mb-1">
-              Object Detection Model
+            <label className="block text-xs font-black uppercase tracking-wider text-black mb-1.5">
+              Object Detection Architecture
             </label>
-            <select
-              value={modelName}
-              onChange={(e) => setModelName(e.target.value)}
-              className="w-full text-xs font-medium px-3 py-2 rounded-lg bg-zinc-50 border border-zinc-300 text-zinc-900 focus:outline-none focus:ring-2 focus:ring-zinc-950"
-            >
-              {models.length > 0 ? (
-                models.map((m) => (
-                  <option key={m.id} value={m.name}>
-                    {m.name.toUpperCase()} ({m.model_family} - {m.name === 'yolov8n' ? 'Fast, CPU Optimized ~35 FPS' : 'Higher Precision, ~15 FPS'})
-                  </option>
-                ))
-              ) : (
-                <>
-                  <option value="yolov8n">YOLOv8 Nano (yolov8n - Fast, CPU Optimized ~35 FPS)</option>
-                  <option value="yolov8s">YOLOv8 Small (yolov8s - Higher Precision, ~15 FPS)</option>
-                </>
-              )}
-            </select>
+            <div className="grid grid-cols-2 gap-2.5">
+              <button
+                type="button"
+                onClick={() => setModelName('yolov8n')}
+                className={`p-3 rounded-xl border-2 text-left transition-all ${
+                  modelName === 'yolov8n'
+                    ? 'border-blue-600 bg-blue-50/50 shadow-sm shadow-blue-500/20'
+                    : 'border-zinc-200 bg-white hover:border-zinc-300'
+                }`}
+              >
+                <div className="flex items-center justify-between mb-1">
+                  <span className="text-xs font-black text-blue-700">YOLOv8 Nano</span>
+                  <span className="px-1.5 py-0.5 rounded bg-blue-100 text-blue-800 text-[10px] font-extrabold">Fast</span>
+                </div>
+                <p className="text-[11px] font-bold text-black">3.2M params &bull; ~35 FPS</p>
+                <p className="text-[10px] font-semibold text-zinc-600">Edge CPU Optimized</p>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setModelName('yolov8s')}
+                className={`p-3 rounded-xl border-2 text-left transition-all ${
+                  modelName === 'yolov8s'
+                    ? 'border-purple-600 bg-purple-50/50 shadow-sm shadow-purple-500/20'
+                    : 'border-zinc-200 bg-white hover:border-zinc-300'
+                }`}
+              >
+                <div className="flex items-center justify-between mb-1">
+                  <span className="text-xs font-black text-purple-700">YOLOv8 Small</span>
+                  <span className="px-1.5 py-0.5 rounded bg-purple-100 text-purple-800 text-[10px] font-extrabold">Precise</span>
+                </div>
+                <p className="text-[11px] font-bold text-black">11.2M params &bull; ~18 FPS</p>
+                <p className="text-[10px] font-semibold text-zinc-600">Higher Precision mAP</p>
+              </button>
+            </div>
           </div>
 
           {/* Threshold Sliders */}
-          <div className="space-y-4">
+          <div className="space-y-4 pt-1">
             <div>
-              <div className="flex justify-between text-xs font-semibold text-zinc-700 mb-1">
+              <div className="flex justify-between text-xs font-black text-black mb-1.5">
                 <span>Confidence Threshold</span>
-                <span className="font-mono text-zinc-950">{confThresh}</span>
+                <span className="font-mono text-indigo-700 font-extrabold px-2 py-0.5 bg-indigo-50 rounded border border-indigo-200">
+                  {confThresh}
+                </span>
               </div>
               <input
                 type="range"
@@ -198,14 +229,16 @@ export const AnalysisPage: React.FC<AnalysisPageProps> = ({
                 step="0.05"
                 value={confThresh}
                 onChange={(e) => setConfThresh(parseFloat(e.target.value))}
-                className="w-full accent-zinc-950 cursor-pointer"
+                className="w-full accent-indigo-600 cursor-pointer h-2 bg-zinc-200 rounded-lg"
               />
             </div>
 
             <div>
-              <div className="flex justify-between text-xs font-semibold text-zinc-700 mb-1">
+              <div className="flex justify-between text-xs font-black text-black mb-1.5">
                 <span>IoU NMS Threshold</span>
-                <span className="font-mono text-zinc-950">{iouThresh}</span>
+                <span className="font-mono text-purple-700 font-extrabold px-2 py-0.5 bg-purple-50 rounded border border-purple-200">
+                  {iouThresh}
+                </span>
               </div>
               <input
                 type="range"
@@ -214,19 +247,21 @@ export const AnalysisPage: React.FC<AnalysisPageProps> = ({
                 step="0.05"
                 value={iouThresh}
                 onChange={(e) => setIouThresh(parseFloat(e.target.value))}
-                className="w-full accent-zinc-950 cursor-pointer"
+                className="w-full accent-purple-600 cursor-pointer h-2 bg-zinc-200 rounded-lg"
               />
             </div>
 
             <div>
-              <div className="flex justify-between text-xs font-semibold text-zinc-700 mb-1">
+              <div className="flex justify-between text-xs font-black text-black mb-1.5">
                 <span>Frame Sampling (Skip)</span>
-                <span className="font-mono text-zinc-950">Every {frameSkip} frame</span>
+                <span className="font-mono text-emerald-700 font-extrabold px-2 py-0.5 bg-emerald-50 rounded border border-emerald-200">
+                  Every {frameSkip} Frame
+                </span>
               </div>
               <select
                 value={frameSkip}
                 onChange={(e) => setFrameSkip(parseInt(e.target.value, 10))}
-                className="w-full text-xs font-medium px-3 py-1.5 rounded-lg bg-zinc-50 border border-zinc-300 text-zinc-900"
+                className="w-full text-xs font-bold px-3 py-2 rounded-xl bg-white border-2 border-zinc-200 text-black focus:outline-none focus:border-indigo-600"
               >
                 <option value={1}>1 (Full Video - Analyze every frame)</option>
                 <option value={2}>2 (Analyze every 2nd frame - 2x speed)</option>
@@ -236,54 +271,62 @@ export const AnalysisPage: React.FC<AnalysisPageProps> = ({
           </div>
 
           {/* Virtual Counting Line Configuration */}
-          <div className="pt-2 border-t border-zinc-100 space-y-3">
-            <span className="text-xs font-bold text-zinc-900 uppercase tracking-wider block">
-              Virtual Counting Tripwire
-            </span>
+          <div className="pt-4 border-t-2 border-zinc-100 space-y-3">
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-black uppercase tracking-wider text-black block">
+                Virtual Counting Tripwire
+              </span>
+              <span className="text-[10px] font-black uppercase px-2 py-0.5 rounded bg-cyan-100 text-cyan-800 border border-cyan-300">
+                2D Vector Cross Product
+              </span>
+            </div>
+
             <div>
-              <label className="text-[11px] text-zinc-500 block mb-0.5">Line Identifier</label>
+              <label className="text-[11px] font-bold text-zinc-700 block mb-1">Line Label</label>
               <input
                 type="text"
                 value={lineName}
                 onChange={(e) => setLineName(e.target.value)}
-                className="w-full text-xs px-2.5 py-1.5 rounded bg-zinc-50 border border-zinc-300 text-zinc-900"
+                className="w-full text-xs font-bold px-3 py-1.5 rounded-lg bg-white border-2 border-zinc-200 text-black"
               />
             </div>
-            <div className="grid grid-cols-2 gap-2 text-xs">
-              <div>
-                <label className="text-[11px] text-zinc-500 block mb-0.5">Start Point (X, Y)</label>
-                <div className="flex gap-1">
+
+            <div className="grid grid-cols-2 gap-3 text-xs">
+              <div className="p-2.5 rounded-xl bg-cyan-50/50 border border-cyan-200">
+                <label className="text-[11px] font-extrabold text-cyan-900 block mb-1">Start (X, Y)</label>
+                <div className="flex gap-1.5">
                   <input
                     type="number"
                     value={startX}
                     onChange={(e) => setStartX(parseInt(e.target.value, 10))}
-                    className="w-1/2 px-2 py-1 bg-zinc-50 border border-zinc-300 rounded text-center"
+                    className="w-1/2 px-2 py-1 bg-white border-2 border-zinc-200 rounded font-mono font-bold text-center"
                     placeholder="X"
                   />
                   <input
                     type="number"
                     value={startY}
                     onChange={(e) => setStartY(parseInt(e.target.value, 10))}
-                    className="w-1/2 px-2 py-1 bg-zinc-50 border border-zinc-300 rounded text-center"
+                    className="w-1/2 px-2 py-1 bg-white border-2 border-zinc-200 rounded font-mono font-bold text-center"
                     placeholder="Y"
                   />
                 </div>
               </div>
-              <div>
-                <label className="text-[11px] text-zinc-500 block mb-0.5">End Point (X, Y)</label>
-                <div className="flex gap-1">
+
+              <div className="p-2.5 rounded-xl bg-amber-50/50 border border-amber-200">
+                <label className="text-[11px] font-extrabold text-amber-900 block mb-1">End (X, Y)</label>
+                <div className="flex gap-1.5">
                   <input
                     type="number"
                     value={endX}
                     onChange={(e) => setEndX(parseInt(e.target.value, 10))}
-                    className="w-1/2 px-2 py-1 bg-zinc-50 border border-zinc-300 rounded text-center"
+                    className="w-1/2 px-2 py-1 bg-white border-2 border-zinc-200 rounded font-mono font-bold text-center"
                     placeholder="X"
                   />
                   <input
                     type="number"
                     value={endY}
                     onChange={(e) => setEndY(parseInt(e.target.value, 10))}
-                    className="w-1/2 px-2 py-1 bg-zinc-50 border border-zinc-300 rounded text-center"
+                    className="w-1/2 px-2 py-1 bg-white border-2 border-zinc-200 rounded font-mono font-bold text-center"
                     placeholder="Y"
                   />
                 </div>
@@ -295,24 +338,24 @@ export const AnalysisPage: React.FC<AnalysisPageProps> = ({
           <button
             onClick={handleLaunchJob}
             disabled={submitting || jobDetail?.status === 'PROCESSING'}
-            className="w-full py-2.5 px-4 rounded-lg bg-zinc-950 text-white font-bold text-sm hover:bg-zinc-800 disabled:opacity-50 transition-all shadow-md flex items-center justify-center gap-2"
+            className="w-full py-3.5 px-4 rounded-xl bg-gradient-to-r from-blue-600 via-indigo-600 to-violet-600 hover:from-blue-700 hover:to-violet-700 text-white font-black text-sm disabled:opacity-50 transition-all shadow-lg shadow-indigo-500/30 flex items-center justify-center gap-2 cursor-pointer"
           >
             {submitting || jobDetail?.status === 'PROCESSING' ? (
               <>
-                <Loader2 className="w-4 h-4 animate-spin" />
-                <span>Processing Video Pipeline...</span>
+                <Loader2 className="w-4 h-4 animate-spin text-white" />
+                <span>Executing Pipeline Inference...</span>
               </>
             ) : (
               <>
-                <Play className="w-4 h-4" />
-                <span>Launch Traffic Analysis</span>
+                <Play className="w-4 h-4 text-white" />
+                <span>Launch Traffic Analysis Pipeline</span>
               </>
             )}
           </button>
 
           {errorMsg && (
-            <div className="p-3 rounded-lg bg-red-50 border border-red-200 text-xs text-red-700 flex items-start gap-2">
-              <AlertCircle className="w-4 h-4 flex-shrink-0 mt-0.5" />
+            <div className="p-3.5 rounded-xl bg-rose-50 border-2 border-rose-300 text-xs text-rose-800 font-extrabold flex items-start gap-2">
+              <AlertCircle className="w-4 h-4 flex-shrink-0 mt-0.5 text-rose-600" />
               <span>{errorMsg}</span>
             </div>
           )}
@@ -322,94 +365,106 @@ export const AnalysisPage: React.FC<AnalysisPageProps> = ({
         <div className="lg:col-span-2 space-y-6">
           {/* Progress / Status Banner */}
           {jobDetail && (
-            <div className="bg-white p-5 rounded-xl border border-zinc-200 shadow-sm space-y-3">
+            <div className="bg-white p-6 rounded-2xl border-2 border-zinc-200 shadow-sm space-y-3">
               <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2.5">
                   <span
-                    className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold ${
+                    className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-black ${
                       jobDetail.status === 'COMPLETED'
-                        ? 'bg-emerald-100 text-emerald-800'
+                        ? 'bg-emerald-100 text-emerald-950 border-2 border-emerald-400'
                         : jobDetail.status === 'PROCESSING'
-                        ? 'bg-blue-100 text-blue-800 animate-pulse'
-                        : 'bg-zinc-100 text-zinc-800'
+                        ? 'bg-blue-100 text-blue-950 border-2 border-blue-400 animate-pulse'
+                        : 'bg-zinc-100 text-black border-2 border-zinc-300'
                     }`}
                   >
                     {jobDetail.status}
                   </span>
-                  <span className="text-xs text-zinc-500 font-mono">Job {jobDetail.id.substring(0, 8)}...</span>
+                  <span className="text-xs text-zinc-700 font-mono font-bold">Pipeline ID: {jobDetail.id.substring(0, 8)}...</span>
                 </div>
-                <div className="text-xs text-zinc-700 font-medium">
-                  {jobDetail.processing_fps ? `${jobDetail.processing_fps} FPS` : ''} | Frame {jobDetail.current_frame} / {jobDetail.total_frames}
+                <div className="text-xs font-extrabold text-black font-mono">
+                  {jobDetail.processing_fps ? `${jobDetail.processing_fps.toFixed(1)} FPS` : ''} | Frame {jobDetail.current_frame} / {jobDetail.total_frames}
                 </div>
               </div>
 
               {/* Progress Bar */}
-              <div className="w-full bg-zinc-100 rounded-full h-2.5 overflow-hidden">
+              <div className="w-full bg-zinc-100 rounded-full h-3 overflow-hidden border border-zinc-200">
                 <div
-                  className="bg-zinc-950 h-2.5 transition-all duration-300 rounded-full"
+                  className="bg-gradient-to-r from-blue-600 via-indigo-600 to-emerald-500 h-3 transition-all duration-300 rounded-full"
                   style={{ width: `${jobDetail.progress_pct}%` }}
                 ></div>
               </div>
             </div>
           )}
 
-          {/* Video Player Display */}
-          <div className="bg-zinc-950 rounded-xl overflow-hidden shadow-lg border border-zinc-900 aspect-video flex flex-col items-center justify-center relative">
+          {/* Synchronized Video Player Display */}
+          <div className="bg-white rounded-2xl overflow-hidden shadow-md border-2 border-zinc-300 aspect-video flex flex-col items-center justify-center relative">
             {jobDetail?.status === 'COMPLETED' && jobDetail.annotated_video_url ? (
               <video
                 src={jobDetail.annotated_video_url}
                 controls
                 autoPlay
                 loop
-                className="w-full h-full object-contain"
+                className="w-full h-full object-contain bg-black"
               />
             ) : jobDetail?.status === 'PROCESSING' ? (
-              <div className="flex flex-col items-center gap-3 text-white p-8">
-                <Loader2 className="w-10 h-10 animate-spin text-zinc-300" />
-                <span className="text-sm font-semibold tracking-wide">
-                  Processing Video Frames ({jobDetail.progress_pct}%)...
+              <div className="flex flex-col items-center gap-3.5 text-black p-8 text-center bg-zinc-50 w-full h-full justify-center">
+                <div className="p-4 rounded-2xl bg-indigo-100 text-indigo-700">
+                  <Loader2 className="w-10 h-10 animate-spin text-indigo-600" />
+                </div>
+                <span className="text-base font-black text-black">
+                  Processing Surveillance Frames ({jobDetail.progress_pct}%)...
                 </span>
-                <span className="text-xs text-zinc-400">
-                  Executing YOLO inference, ByteTrack association, and video re-encoding
+                <span className="text-xs font-semibold text-zinc-600 max-w-md">
+                  Executing YOLOv8 neural detection, ByteTrack two-stage Kalman filter tracking, virtual counting line intersection, and OpenCV annotated video re-encoding.
                 </span>
               </div>
             ) : selectedVideo ? (
-              <div className="flex flex-col items-center gap-2 text-zinc-400 p-8 text-center">
-                <Video className="w-12 h-12 text-zinc-600 mb-2" />
-                <span className="text-sm font-semibold text-zinc-200">{selectedVideo.original_filename}</span>
-                <span className="text-xs text-zinc-500">
-                  {selectedVideo.width} &times; {selectedVideo.height} | {selectedVideo.total_frames} Frames | Ready for analysis
-                </span>
+              <div className="flex flex-col items-center gap-3 text-black p-8 text-center bg-zinc-50 w-full h-full justify-center">
+                <div className="p-4 rounded-2xl bg-blue-100 text-blue-700">
+                  <Video className="w-10 h-10 text-blue-700" />
+                </div>
+                <span className="text-base font-black text-black">{selectedVideo.original_filename}</span>
+                <div className="flex flex-wrap gap-2 justify-center">
+                  <span className="px-2.5 py-1 rounded bg-cyan-100 text-cyan-900 border border-cyan-300 text-xs font-bold">
+                    {selectedVideo.width} &times; {selectedVideo.height}
+                  </span>
+                  <span className="px-2.5 py-1 rounded bg-purple-100 text-purple-900 border border-purple-300 text-xs font-bold">
+                    {selectedVideo.total_frames} Frames
+                  </span>
+                  <span className="px-2.5 py-1 rounded bg-emerald-100 text-emerald-900 border border-emerald-300 text-xs font-bold">
+                    Ready For Pipeline
+                  </span>
+                </div>
               </div>
             ) : (
-              <div className="text-zinc-500 text-xs text-center p-8">
-                No video loaded. Select a video from the library to preview and analyze.
+              <div className="text-zinc-600 text-xs font-bold text-center p-8 bg-zinc-50 w-full h-full flex items-center justify-center">
+                No video loaded. Select a video from the library to configure and analyze.
               </div>
             )}
           </div>
 
           {/* Report Export Bar (Visible when completed) */}
           {jobDetail?.status === 'COMPLETED' && (
-            <div className="flex items-center justify-between p-4 bg-zinc-50 rounded-xl border border-zinc-200">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-5 bg-white rounded-2xl border-2 border-zinc-200 shadow-sm">
               <div>
-                <span className="text-xs font-bold text-zinc-950 block">Analysis Complete</span>
-                <span className="text-xs text-zinc-500">Export publication-grade reports for technical review</span>
+                <span className="text-sm font-black text-black block">Analysis Complete &bull; Publication Artifacts</span>
+                <span className="text-xs font-semibold text-zinc-600">Export vector PDF intelligence report or raw JSON telemetry</span>
               </div>
-              <div className="flex gap-2">
+              <div className="flex gap-2.5">
                 <a
                   href={`/api/v1/reports/${jobDetail.id}/export?format=pdf`}
                   download
-                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-zinc-950 text-white text-xs font-semibold hover:bg-zinc-800 transition-all shadow-sm"
+                  className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-rose-600 text-white text-xs font-black hover:bg-rose-700 transition-all shadow-md shadow-rose-600/25"
                 >
-                  <Download className="w-3.5 h-3.5" />
+                  <Download className="w-4 h-4 text-white" />
                   <span>Download PDF Report</span>
                 </a>
                 <a
                   href={`/api/v1/reports/${jobDetail.id}/export?format=json`}
                   download
-                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white border border-zinc-300 text-zinc-900 text-xs font-semibold hover:bg-zinc-50 transition-all shadow-sm"
+                  className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-indigo-600 text-white text-xs font-black hover:bg-indigo-700 transition-all shadow-md shadow-indigo-600/25"
                 >
-                  <FileText className="w-3.5 h-3.5" />
+                  <FileText className="w-4 h-4 text-white" />
                   <span>Export JSON</span>
                 </a>
               </div>
@@ -420,52 +475,64 @@ export const AnalysisPage: React.FC<AnalysisPageProps> = ({
 
       {/* Results Breakdown Section */}
       {jobDetail?.status === 'COMPLETED' && (
-        <div className="space-y-6 pt-4 border-t border-zinc-200">
-          <h2 className="text-lg font-bold text-zinc-950 tracking-tight">
-            Traffic Intelligence & Analytical Separation
-          </h2>
+        <div className="space-y-6 pt-6 border-t-2 border-zinc-200">
+          <div className="flex items-center justify-between">
+            <div>
+              <h2 className="text-2xl font-black text-black tracking-tight">
+                Traffic Intelligence & Spatial Flow Breakdown
+              </h2>
+              <p className="text-xs font-semibold text-zinc-600">
+                Ground-truth calibrated detections, Kalman filter trajectories, and directional line counts
+              </p>
+            </div>
+          </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
             {/* Metric 1: Raw Detections */}
-            <div className="bg-white p-5 rounded-xl border border-zinc-200 shadow-sm space-y-2">
-              <div className="flex items-center justify-between text-zinc-500 text-xs font-semibold uppercase">
-                <span>Raw Detections</span>
-                <Eye className="w-4 h-4 text-zinc-950" />
+            <div className="bg-white p-6 rounded-2xl border-2 border-zinc-200 border-t-4 border-t-blue-600 shadow-sm space-y-2">
+              <div className="flex items-center justify-between text-zinc-700 text-xs font-black uppercase tracking-wider">
+                <span>Raw YOLO Instances</span>
+                <Eye className="w-4 h-4 text-blue-600" />
               </div>
-              <div className="text-3xl font-extrabold text-zinc-950">
+              <div className="text-4xl font-black text-black">
                 {jobDetail.detection_summary?.total_detections ?? 0}
               </div>
-              <p className="text-xs text-zinc-500">
-                Avg confidence: {((jobDetail.detection_summary?.average_confidence ?? 0) * 100).toFixed(1)}%
+              <p className="text-xs font-bold text-blue-700">
+                Mean Confidence Score: {((jobDetail.detection_summary?.average_confidence ?? 0) * 100).toFixed(1)}%
               </p>
             </div>
 
             {/* Metric 2: Unique Vehicles */}
-            <div className="bg-white p-5 rounded-xl border border-zinc-200 shadow-sm space-y-2">
-              <div className="flex items-center justify-between text-zinc-500 text-xs font-semibold uppercase">
-                <span>Unique Tracked Vehicles</span>
-                <Car className="w-4 h-4 text-zinc-950" />
+            <div className="bg-white p-6 rounded-2xl border-2 border-zinc-200 border-t-4 border-t-purple-600 shadow-sm space-y-2">
+              <div className="flex items-center justify-between text-zinc-700 text-xs font-black uppercase tracking-wider">
+                <span>Unique Tracked IDs</span>
+                <Car className="w-4 h-4 text-purple-600" />
               </div>
-              <div className="text-3xl font-extrabold text-zinc-950">
+              <div className="text-4xl font-black text-black">
                 {jobDetail.tracking_summary?.total_unique_tracks ?? 0}
               </div>
-              <p className="text-xs text-zinc-500">
-                Avg scene duration: {jobDetail.tracking_summary?.avg_track_duration_sec ?? 0}s
+              <p className="text-xs font-bold text-purple-700">
+                Avg Track Duration: {jobDetail.tracking_summary?.avg_track_duration_sec ?? 0}s
               </p>
             </div>
 
             {/* Metric 3: Virtual Line Crossings */}
-            <div className="bg-white p-5 rounded-xl border border-zinc-200 shadow-sm space-y-2">
-              <div className="flex items-center justify-between text-zinc-500 text-xs font-semibold uppercase">
-                <span>Line Crossings</span>
-                <TrendingUp className="w-4 h-4 text-zinc-950" />
+            <div className="bg-white p-6 rounded-2xl border-2 border-zinc-200 border-t-4 border-t-emerald-600 shadow-sm space-y-2">
+              <div className="flex items-center justify-between text-zinc-700 text-xs font-black uppercase tracking-wider">
+                <span>Tripwire Crossings</span>
+                <TrendingUp className="w-4 h-4 text-emerald-600" />
               </div>
-              <div className="text-3xl font-extrabold text-zinc-950">
+              <div className="text-4xl font-black text-black">
                 {jobDetail.tracking_summary?.total_line_crossings ?? 0}
               </div>
-              <p className="text-xs text-zinc-500">
-                In: {jobDetail.tracking_summary?.crossings_by_direction?.['Inbound'] ?? 0} | Out: {jobDetail.tracking_summary?.crossings_by_direction?.['Outbound'] ?? 0}
-              </p>
+              <div className="flex gap-3 text-xs font-extrabold pt-1">
+                <span className="px-2 py-0.5 rounded bg-emerald-50 text-emerald-800 border border-emerald-300">
+                  Inbound: {jobDetail.tracking_summary?.crossings_by_direction?.['Inbound'] ?? 0}
+                </span>
+                <span className="px-2 py-0.5 rounded bg-amber-50 text-amber-900 border border-amber-300">
+                  Outbound: {jobDetail.tracking_summary?.crossings_by_direction?.['Outbound'] ?? 0}
+                </span>
+              </div>
             </div>
           </div>
         </div>

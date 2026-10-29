@@ -14,27 +14,40 @@ FROM nginx:alpine
 
 COPY --from=build /app/dist /usr/share/nginx/html
 
-# Custom nginx config to proxy API requests to backend
+# Custom nginx config with large file upload support and API reverse proxy
 RUN printf 'server {\n\
     listen 80;\n\
+    client_max_body_size 250M;\n\
+    \n\
     location / {\n\
         root /usr/share/nginx/html;\n\
         index index.html index.htm;\n\
         try_files $uri $uri/ /index.html;\n\
     }\n\
+    \n\
     location /api/ {\n\
         proxy_pass http://backend:8000/api/;\n\
+        proxy_http_version 1.1;\n\
         proxy_set_header Host $host;\n\
         proxy_set_header X-Real-IP $remote_addr;\n\
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;\n\
+        proxy_set_header X-Forwarded-Proto $scheme;\n\
+        proxy_read_timeout 300s;\n\
+        proxy_connect_timeout 75s;\n\
     }\n\
+    \n\
     location /media/ {\n\
         proxy_pass http://backend:8000/media/;\n\
+        proxy_http_version 1.1;\n\
         proxy_set_header Host $host;\n\
         proxy_set_header X-Real-IP $remote_addr;\n\
+        proxy_read_timeout 300s;\n\
     }\n\
 }\n' > /etc/nginx/conf.d/default.conf
 
 EXPOSE 80
 
-CMD ["nginx", "-g", "daemon off;"]
+HEALTHCHECK --interval=15s --timeout=3s --retries=3 \
+    CMD wget --quiet --tries=1 --spider http://localhost:80/ || exit 1
 
+CMD ["nginx", "-g", "daemon off;"]

@@ -9,7 +9,7 @@ from app.core.config import settings
 @pytest.mark.asyncio
 async def test_full_pipeline_end_to_end(client):
     # 1. Upload sample traffic video
-    sample_video_path = Path("tests/fixtures/sample_traffic.mp4")
+    sample_video_path = Path(__file__).parent / "fixtures" / "sample_traffic.mp4"
     assert sample_video_path.exists(), "Sample traffic video fixture must exist."
 
     with open(sample_video_path, "rb") as f:

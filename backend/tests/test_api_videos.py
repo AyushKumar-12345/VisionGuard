@@ -16,7 +16,7 @@ async def test_health_check(client):
 
 @pytest.mark.asyncio
 async def test_video_upload_and_lifecycle(client):
-    sample_video_path = Path("tests/fixtures/sample_traffic.mp4")
+    sample_video_path = Path(__file__).parent / "fixtures" / "sample_traffic.mp4"
     assert sample_video_path.exists(), "Sample traffic video fixture must exist."
 
     with open(sample_video_path, "rb") as f:

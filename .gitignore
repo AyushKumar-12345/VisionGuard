@@ -74,3 +74,6 @@ coverage.xml
 # Antigravity Brain / Temp
 .gemini/
 
+
+resume.tex
+*.db

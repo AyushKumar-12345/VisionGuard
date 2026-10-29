@@ -1,0 +1,29 @@
+# Git
+.git
+.gitignore
+.github
+
+# Python
+.venv
+venv
+__pycache__
+*.pyc
+*.pyo
+*.pyd
+.pytest_cache
+.ruff_cache
+*.db
+*.sqlite3
+
+# Node & Frontend
+**/node_modules
+**/dist
+**/build
+.npm
+.yarn
+
+# Logs & Temp
+*.log
+.DS_Store
+Thumbs.db
+

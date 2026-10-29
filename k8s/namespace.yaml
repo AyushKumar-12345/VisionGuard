@@ -1,0 +1,8 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: visionguard
+  labels:
+    app.kubernetes.io/name: visionguard
+    app.kubernetes.io/part-of: visionguard-platform
+

@@ -3,9 +3,10 @@ import {
   Activity,
   BarChart3,
   Cpu,
+  HardDrive,
   Layers,
   PlaySquare,
-  ShieldAlert,
+  ShieldCheck,
   Video
 } from 'lucide-react';
 import { HealthStatus } from '../types';
@@ -18,34 +19,39 @@ interface NavbarProps {
 
 export const Navbar: React.FC<NavbarProps> = ({ activeTab, setActiveTab, health }) => {
   const navItems = [
-    { id: 'overview', label: 'Overview', icon: BarChart3 },
-    { id: 'videos', label: 'Video Library', icon: Video },
-    { id: 'analysis', label: 'Live Analysis & Player', icon: PlaySquare },
-    { id: 'analytics', label: 'Traffic Analytics', icon: Activity },
-    { id: 'models', label: 'Multi-Model Benchmark', icon: Layers },
+    { id: 'overview', label: 'Overview', icon: BarChart3, color: 'text-blue-600' },
+    { id: 'videos', label: 'Video Library', icon: Video, color: 'text-purple-600' },
+    { id: 'analysis', label: 'Live Analysis & Player', icon: PlaySquare, color: 'text-indigo-600' },
+    { id: 'analytics', label: 'Traffic Analytics', icon: Activity, color: 'text-emerald-600' },
+    { id: 'models', label: 'Model Benchmark', icon: Layers, color: 'text-amber-600' },
   ];
 
   return (
-    <header className="sticky top-0 z-50 bg-white border-b border-zinc-200 shadow-sm">
+    <header className="sticky top-0 z-50 bg-white border-b-2 border-zinc-200 shadow-sm">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-16">
+        <div className="flex items-center justify-between h-20">
           {/* Logo & Brand */}
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-lg bg-zinc-950 flex items-center justify-center text-white shadow-md">
-              <ShieldAlert className="w-6 h-6 text-white" />
+          <div className="flex items-center gap-3.5 cursor-pointer" onClick={() => setActiveTab('overview')}>
+            <div className="w-11 h-11 rounded-xl bg-gradient-to-tr from-blue-600 via-indigo-600 to-violet-600 flex items-center justify-center text-white shadow-md shadow-indigo-500/25">
+              <ShieldCheck className="w-6 h-6 text-white" />
             </div>
             <div>
-              <span className="text-xl font-bold tracking-tight text-zinc-950">
-                Vision<span className="text-zinc-500">Guard</span>
-              </span>
-              <span className="hidden sm:inline-block ml-2 text-xs font-medium px-2 py-0.5 rounded bg-zinc-100 text-zinc-700 border border-zinc-200">
-                Multi-Model Traffic Intelligence
-              </span>
+              <div className="flex items-center gap-2">
+                <span className="text-2xl font-black tracking-tight text-black">
+                  Vision<span className="text-indigo-600">Guard</span>
+                </span>
+                <span className="hidden md:inline-flex items-center px-2 py-0.5 rounded-md text-[11px] font-black uppercase tracking-wider bg-indigo-50 text-indigo-700 border border-indigo-200">
+                  CV Engine v1.0
+                </span>
+              </div>
+              <p className="hidden sm:block text-xs font-semibold text-zinc-600">
+                Multi-Model Traffic Intelligence & Vehicle Analytics
+              </p>
             </div>
           </div>
 
           {/* Navigation Tabs */}
-          <nav className="flex space-x-1 sm:space-x-2">
+          <nav className="flex space-x-1 sm:space-x-1.5">
             {navItems.map((item) => {
               const Icon = item.icon;
               const isActive = activeTab === item.id;
@@ -53,33 +59,44 @@ export const Navbar: React.FC<NavbarProps> = ({ activeTab, setActiveTab, health 
                 <button
                   key={item.id}
                   onClick={() => setActiveTab(item.id)}
-                  className={`flex items-center gap-2 px-3 py-2 text-sm font-semibold rounded-md transition-all ${
+                  className={`flex items-center gap-2 px-3.5 py-2.5 text-xs sm:text-sm font-bold rounded-xl transition-all ${
                     isActive
-                      ? 'bg-zinc-950 text-white shadow-sm'
-                      : 'text-zinc-600 hover:text-zinc-950 hover:bg-zinc-100'
+                      ? 'bg-indigo-600 text-white shadow-md shadow-indigo-600/30'
+                      : 'text-black hover:text-indigo-600 hover:bg-zinc-100'
                   }`}
                 >
-                  <Icon className="w-4 h-4" />
+                  <Icon className={`w-4 h-4 ${isActive ? 'text-white' : item.color}`} />
                   <span className="hidden md:inline">{item.label}</span>
                 </button>
               );
             })}
           </nav>
 
-          {/* Hardware & System Health Badge */}
-          <div className="hidden lg:flex items-center gap-3 text-xs">
-            <div className="flex items-center gap-2 px-2.5 py-1.5 rounded-full bg-zinc-50 border border-zinc-200">
-              <span className="relative flex h-2 w-2">
+          {/* Hardware & System Health Badges */}
+          <div className="hidden lg:flex items-center gap-2.5 text-xs">
+            {/* Online Status Pill */}
+            <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-emerald-50 border-2 border-emerald-300 shadow-xs">
+              <span className="relative flex h-2.5 w-2.5">
                 <span className={`animate-ping absolute inline-flex h-full w-full rounded-full opacity-75 ${health?.status === 'online' ? 'bg-emerald-400' : 'bg-amber-400'}`}></span>
-                <span className={`relative inline-flex rounded-full h-2 w-2 ${health?.status === 'online' ? 'bg-emerald-500' : 'bg-amber-500'}`}></span>
+                <span className={`relative inline-flex rounded-full h-2.5 w-2.5 ${health?.status === 'online' ? 'bg-emerald-600' : 'bg-amber-500'}`}></span>
               </span>
-              <span className="font-medium text-zinc-800">
-                {health?.environment.device_name.split('(')[0] || 'CPU Optimized'}
+              <span className="font-extrabold text-emerald-950">
+                {health?.status === 'online' ? 'Engine Online' : 'Connecting...'}
               </span>
-              <span className="text-zinc-400">|</span>
-              <div className="flex items-center gap-1 text-zinc-600">
-                <Cpu className="w-3.5 h-3.5" />
-                <span>{health?.system_resources.cpu_usage_pct ?? 0}%</span>
+            </div>
+
+            {/* Hardware Telemetry Pill */}
+            <div className="flex items-center gap-3 px-3 py-1.5 rounded-xl bg-white border-2 border-zinc-200 shadow-xs">
+              <div className="flex items-center gap-1.5 text-black font-bold">
+                <Cpu className="w-3.5 h-3.5 text-blue-600" />
+                <span className="text-zinc-600 font-semibold">CPU:</span>
+                <span className="text-blue-600 font-extrabold">{health?.system_resources.cpu_usage_pct ?? 0}%</span>
+              </div>
+              <span className="text-zinc-300">|</span>
+              <div className="flex items-center gap-1.5 text-black font-bold">
+                <HardDrive className="w-3.5 h-3.5 text-purple-600" />
+                <span className="text-zinc-600 font-semibold">RAM:</span>
+                <span className="text-purple-600 font-extrabold">{health?.system_resources.memory_used_gb ?? 0} GB</span>
               </div>
             </div>
           </div>
@@ -88,4 +105,3 @@ export const Navbar: React.FC<NavbarProps> = ({ activeTab, setActiveTab, health 
     </header>
   );
 };
-
