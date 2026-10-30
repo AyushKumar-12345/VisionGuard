@@ -39,20 +39,16 @@ COPY backend /app/backend
 
 WORKDIR /app/backend
 
-# Create unprivileged user and storage directories
-RUN useradd -m -u 1000 appuser && \
-    mkdir -p /app/data/uploads /app/data/annotated /app/data/reports /app/data/weights /app/data/evaluations && \
-    chown -R appuser:appuser /app
-
-USER appuser
+# Create storage directories and set permissions
+RUN mkdir -p /app/data/uploads /app/data/annotated /app/data/reports /app/data/weights /app/data/evaluations && \
+    chmod -R 777 /app/data
 
 ENV PYTHONPATH=/app/backend \
     DATA_DIR=/app/data \
-    PYTHONUNBUFFERED=1
+    YOLO_CONFIG_DIR=/app/data/weights \
+    PYTHONUNBUFFERED=1 \
+    PORT=10000
 
-EXPOSE 8000
+EXPOSE 10000
 
-HEALTHCHECK --interval=10s --timeout=5s --start-period=15s --retries=3 \
-    CMD curl -f http://localhost:8000/api/v1/health || exit 1
-
-CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
+CMD exec uvicorn app.main:app --host 0.0.0.0 --port ${PORT:-10000}
