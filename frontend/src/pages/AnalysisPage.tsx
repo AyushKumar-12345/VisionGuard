@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import {
   AlertCircle,
   Car,
+  Crosshair,
   Download,
   Eye,
   FileText,
@@ -52,7 +53,29 @@ export const AnalysisPage: React.FC<AnalysisPageProps> = ({
   const [playbackSpeed, setPlaybackSpeed] = useState<number>(1.0);
   const [showTripwireOverlay, setShowTripwireOverlay] = useState<boolean>(true);
   const [videoError, setVideoError] = useState<string | null>(null);
+  const [isCalibratingPoints, setIsCalibratingPoints] = useState<'idle' | 'start' | 'end'>('idle');
   const videoRef = useRef<HTMLVideoElement>(null);
+
+  const handleVideoCanvasClick = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (isCalibratingPoints === 'idle' || !selectedVideo) return;
+
+    const rect = e.currentTarget.getBoundingClientRect();
+    const scaleX = (selectedVideo.width || 1280) / rect.width;
+    const scaleY = (selectedVideo.height || 720) / rect.height;
+
+    const clickX = Math.max(0, Math.min(selectedVideo.width || 1280, Math.round((e.clientX - rect.left) * scaleX)));
+    const clickY = Math.max(0, Math.min(selectedVideo.height || 720, Math.round((e.clientY - rect.top) * scaleY)));
+
+    if (isCalibratingPoints === 'start') {
+      setStartX(clickX);
+      setStartY(clickY);
+      setIsCalibratingPoints('end');
+    } else if (isCalibratingPoints === 'end') {
+      setEndX(clickX);
+      setEndY(clickY);
+      setIsCalibratingPoints('idle');
+    }
+  };
 
   useEffect(() => {
     if (selectedVideoId) {
@@ -315,6 +338,26 @@ export const AnalysisPage: React.FC<AnalysisPageProps> = ({
               />
             </div>
 
+            {/* Click-to-Position on Video button */}
+            <button
+              type="button"
+              onClick={() => setIsCalibratingPoints(isCalibratingPoints === 'idle' ? 'start' : 'idle')}
+              className={`w-full py-2.5 px-3 rounded-xl text-xs font-black transition-all flex items-center justify-center gap-2 cursor-pointer shadow-xs ${
+                isCalibratingPoints !== 'idle'
+                  ? 'bg-amber-400 text-black shadow-md shadow-amber-400/30 ring-2 ring-amber-500 animate-pulse'
+                  : 'bg-zinc-100 hover:bg-zinc-200 text-black border-2 border-zinc-200 hover:border-indigo-500'
+              }`}
+            >
+              <Crosshair className="w-4 h-4 text-indigo-600" />
+              <span>
+                {isCalibratingPoints === 'start'
+                  ? '🎯 Step 1/2: Click on Video for START Point'
+                  : isCalibratingPoints === 'end'
+                  ? '🎯 Step 2/2: Click on Video for END Point'
+                  : 'Click-To-Place Tripwire on Video'}
+              </span>
+            </button>
+
             {/* Quick Tripwire Presets */}
             <div>
               <span className="text-[11px] font-bold text-zinc-600 block mb-1.5">Quick Geometric Presets:</span>
@@ -572,7 +615,23 @@ export const AnalysisPage: React.FC<AnalysisPageProps> = ({
             </div>
 
             {/* Video Canvas Container */}
-            <div className="bg-zinc-950 rounded-2xl overflow-hidden shadow-md border-2 border-zinc-300 aspect-video flex flex-col items-center justify-center relative">
+            <div
+              onClick={handleVideoCanvasClick}
+              className={`bg-zinc-950 rounded-2xl overflow-hidden shadow-md border-2 border-zinc-300 aspect-video flex flex-col items-center justify-center relative transition-all ${
+                isCalibratingPoints !== 'idle' ? 'cursor-crosshair ring-4 ring-amber-400' : ''
+              }`}
+            >
+              {/* Calibration Guide Banner */}
+              {isCalibratingPoints !== 'idle' && (
+                <div className="absolute top-3 left-3 z-30 px-3.5 py-1.5 rounded-xl bg-amber-400 text-black font-black text-xs shadow-lg flex items-center gap-2 animate-bounce">
+                  <Crosshair className="w-4 h-4 text-black" />
+                  <span>
+                    {isCalibratingPoints === 'start'
+                      ? 'Click video to set START anchor point'
+                      : 'Click video to set END anchor point'}
+                  </span>
+                </div>
+              )}
               {jobDetail?.status === 'PROCESSING' ? (
                 <div className="flex flex-col items-center gap-3.5 text-black p-8 text-center bg-zinc-50 w-full h-full justify-center">
                   <div className="p-4 rounded-2xl bg-indigo-100 text-indigo-700">

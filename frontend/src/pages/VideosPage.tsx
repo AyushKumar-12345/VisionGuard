@@ -1,5 +1,8 @@
 import React, { useState } from 'react';
 import {
+  Check,
+  Copy,
+  Download,
   Eye,
   Film,
   Play,
@@ -28,6 +31,13 @@ export const VideosPage: React.FC<VideosPageProps> = ({
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [previewVideo, setPreviewVideo] = useState<VideoItem | null>(null);
+  const [copiedHash, setCopiedHash] = useState<string | null>(null);
+
+  const handleCopyHash = (hash: string) => {
+    navigator.clipboard.writeText(hash);
+    setCopiedHash(hash);
+    setTimeout(() => setCopiedHash(null), 2000);
+  };
 
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -180,9 +190,28 @@ export const VideosPage: React.FC<VideosPageProps> = ({
                         </div>
                         <div>
                           <span className="text-sm font-extrabold block">{v.original_filename}</span>
-                          <span className="text-[10px] font-mono text-zinc-500 font-normal">
-                            ID: {v.id.substring(0, 8)}... &bull; SHA: {v.file_hash_sha256.substring(0, 8)}...
-                          </span>
+                          <div className="flex items-center gap-1.5 text-[10px] font-mono text-zinc-500 font-normal mt-0.5">
+                            <span>ID: {v.id.substring(0, 8)}...</span>
+                            <span>&bull;</span>
+                            <span className="flex items-center gap-1">
+                              SHA: {v.file_hash_sha256.substring(0, 8)}...
+                              <button
+                                type="button"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleCopyHash(v.file_hash_sha256);
+                                }}
+                                className="p-0.5 hover:text-black transition-colors cursor-pointer"
+                                title="Copy full SHA-256 fingerprint"
+                              >
+                                {copiedHash === v.file_hash_sha256 ? (
+                                  <Check className="w-3 h-3 text-emerald-600" />
+                                ) : (
+                                  <Copy className="w-3 h-3 text-zinc-400 hover:text-zinc-700" />
+                                )}
+                              </button>
+                            </span>
+                          </div>
                         </div>
                       </div>
                     </td>
@@ -219,6 +248,16 @@ export const VideosPage: React.FC<VideosPageProps> = ({
                         <Eye className="w-3.5 h-3.5 text-indigo-600" />
                         <span>Preview</span>
                       </button>
+
+                      {/* Download Button */}
+                      <a
+                        href={v.preview_url || `/media/uploads/${v.id}.mp4`}
+                        download={v.original_filename}
+                        className="inline-flex items-center gap-1 text-xs font-black px-2.5 py-2 rounded-xl bg-zinc-100 hover:bg-zinc-200 text-black transition-all cursor-pointer shadow-xs"
+                        title="Download raw video file"
+                      >
+                        <Download className="w-3.5 h-3.5 text-zinc-700" />
+                      </a>
 
                       {/* Run Analysis Button */}
                       <button

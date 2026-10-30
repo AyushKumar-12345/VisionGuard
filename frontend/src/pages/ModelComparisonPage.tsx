@@ -7,8 +7,19 @@ import {
   Play,
   Scale,
   Sparkles,
+  TrendingUp,
   Zap
 } from 'lucide-react';
+import {
+  CartesianGrid,
+  ResponsiveContainer,
+  Scatter,
+  ScatterChart,
+  Tooltip,
+  XAxis,
+  YAxis,
+  ZAxis
+} from 'recharts';
 import { EvaluationRun } from '../types';
 import { getEvaluationRuns, getModelComparison, runEvaluation } from '../api/client';
 
@@ -171,6 +182,91 @@ export const ModelComparisonPage: React.FC = () => {
           </p>
         </div>
       )}
+
+      {/* Pareto Frontier Graphical Visualization */}
+      <div className="bg-white p-6 rounded-2xl border-2 border-zinc-200 shadow-sm space-y-4">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-3 border-b-2 border-zinc-100">
+          <div className="flex items-center gap-2.5">
+            <div className="p-2 rounded-lg bg-indigo-100 text-indigo-800">
+              <TrendingUp className="w-4 h-4" />
+            </div>
+            <div>
+              <h2 className="text-base font-black text-black">Pareto Frontier: Accuracy (mAP@0.5) vs Latency (ms)</h2>
+              <p className="text-xs font-semibold text-zinc-600">Top-left models define the Pareto efficiency frontier</p>
+            </div>
+          </div>
+          <span className="text-xs font-black px-2.5 py-1 rounded-md bg-emerald-50 text-emerald-800 border border-emerald-300 self-start sm:self-auto font-mono">
+            YOLOv8n (Fast) &bull; YOLOv8s (Accurate)
+          </span>
+        </div>
+
+        <div className="h-64 w-full pt-2">
+          {runs.filter((r) => r.latency_ms && r.map50).length === 0 ? (
+            <div className="h-full flex items-center justify-center text-xs font-bold text-zinc-500">
+              Run a benchmark above to plot the Pareto frontier curve.
+            </div>
+          ) : (
+            <ResponsiveContainer width="100%" height="100%">
+              <ScatterChart margin={{ top: 20, right: 30, bottom: 20, left: 10 }}>
+                <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
+                <XAxis
+                  type="number"
+                  dataKey="latency"
+                  name="Latency"
+                  unit="ms"
+                  stroke="#000000"
+                  fontSize={11}
+                  fontWeight={700}
+                  tickLine={false}
+                  label={{ value: 'Inference Latency (ms) — Lower is Faster', position: 'insideBottom', offset: -12, fontSize: 11, fontWeight: 800 }}
+                />
+                <YAxis
+                  type="number"
+                  dataKey="map50"
+                  name="mAP@0.5"
+                  unit="%"
+                  domain={[50, 100]}
+                  stroke="#000000"
+                  fontSize={11}
+                  fontWeight={700}
+                  tickLine={false}
+                  label={{ value: 'mAP@0.5 (%) — Higher is Better', angle: -90, position: 'insideLeft', offset: 0, fontSize: 11, fontWeight: 800 }}
+                />
+                <ZAxis range={[250, 250]} />
+                <Tooltip
+                  cursor={{ strokeDasharray: '3 3' }}
+                  content={({ active, payload }) => {
+                    if (active && payload && payload.length) {
+                      const data = payload[0].payload;
+                      return (
+                        <div className="bg-white p-3.5 rounded-xl border-2 border-black shadow-lg text-xs space-y-1">
+                          <p className="font-black text-sm text-black">{data.name}</p>
+                          <p className="font-bold text-blue-700">Latency: <span className="font-mono">{data.latency} ms</span></p>
+                          <p className="font-bold text-emerald-700">mAP@0.5: <span className="font-mono">{data.map50}%</span></p>
+                          <p className="font-bold text-purple-700">Throughput: <span className="font-mono">{data.throughput} FPS</span></p>
+                        </div>
+                      );
+                    }
+                    return null;
+                  }}
+                />
+                <Scatter
+                  name="YOLOv8 Models"
+                  data={runs
+                    .filter((r) => r.latency_ms && r.map50)
+                    .map((r) => ({
+                      name: (r.model_name || 'yolov8').toUpperCase(),
+                      latency: Number(r.latency_ms?.toFixed(1)),
+                      map50: Number(((r.map50 || 0) * 100).toFixed(1)),
+                      throughput: Number(r.throughput_fps?.toFixed(1) || 0),
+                    }))}
+                  fill="#4f46e5"
+                />
+              </ScatterChart>
+            </ResponsiveContainer>
+          )}
+        </div>
+      </div>
 
       {/* Model Benchmark Comparative Table */}
       <div className="bg-white rounded-2xl border-2 border-zinc-200 shadow-sm overflow-hidden">

@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import {
   AlertTriangle,
   BarChart2,
+  Clock,
   Download,
   FileSpreadsheet,
   PieChart as PieIcon,
@@ -9,6 +10,8 @@ import {
   TrendingUp
 } from 'lucide-react';
 import {
+  Area,
+  AreaChart,
   Bar,
   BarChart,
   CartesianGrid,
@@ -253,6 +256,71 @@ export const AnalyticsPage: React.FC = () => {
               </ResponsiveContainer>
             )}
           </div>
+        </div>
+      </div>
+
+      {/* Temporal Traffic Density & Flow Timeline */}
+      <div className="bg-white p-7 rounded-2xl border-2 border-zinc-200 shadow-sm space-y-4">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-3 border-b-2 border-zinc-100">
+          <div className="flex items-center gap-2.5">
+            <div className="p-2 rounded-lg bg-cyan-100 text-cyan-800">
+              <Clock className="w-4 h-4" />
+            </div>
+            <div>
+              <h2 className="text-base font-black text-black">Temporal Traffic Density & Flow Progression</h2>
+              <p className="text-xs font-semibold text-zinc-600">Dynamic vehicle throughput recorded across 5-second sampling intervals</p>
+            </div>
+          </div>
+          <span className="text-xs font-black px-2.5 py-1 rounded-md bg-cyan-50 text-cyan-800 border border-cyan-300 self-start sm:self-auto font-mono">
+            Moving Flow Window: 5s
+          </span>
+        </div>
+
+        <div className="h-60 w-full pt-2">
+          <ResponsiveContainer width="100%" height="100%">
+            <AreaChart
+              data={[
+                { time: '0-5s', vehicles: 4, density: 0.8 },
+                { time: '5-10s', vehicles: 7, density: 1.4 },
+                { time: '10-15s', vehicles: 12, density: 2.4 },
+                { time: '15-20s', vehicles: 9, density: 1.8 },
+                { time: '20-25s', vehicles: 15, density: 3.0 },
+                { time: '25-30s', vehicles: 11, density: 2.2 },
+                { time: '30-35s', vehicles: 8, density: 1.6 },
+                { time: '35-40s', vehicles: 9, density: 1.8 },
+              ]}
+              margin={{ top: 10, right: 10, left: -20, bottom: 0 }}
+            >
+              <defs>
+                <linearGradient id="densityGradient" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="5%" stopColor="#0891b2" stopOpacity={0.4} />
+                  <stop offset="95%" stopColor="#0891b2" stopOpacity={0.0} />
+                </linearGradient>
+              </defs>
+              <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
+              <XAxis dataKey="time" stroke="#000000" fontSize={11} fontWeight={700} tickLine={false} />
+              <YAxis stroke="#000000" fontSize={11} fontWeight={700} tickLine={false} />
+              <Tooltip
+                contentStyle={{
+                  backgroundColor: '#ffffff',
+                  border: '2px solid #000000',
+                  borderRadius: '12px',
+                  fontSize: '12px',
+                  fontWeight: 'bold',
+                  color: '#000000',
+                  boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)',
+                }}
+              />
+              <Area
+                type="monotone"
+                dataKey="vehicles"
+                stroke="#0891b2"
+                strokeWidth={3}
+                fillOpacity={1}
+                fill="url(#densityGradient)"
+              />
+            </AreaChart>
+          </ResponsiveContainer>
         </div>
       </div>
 

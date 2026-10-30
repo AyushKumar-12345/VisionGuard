@@ -393,10 +393,10 @@ export const OverviewPage: React.FC<OverviewPageProps> = ({
                       {job.progress_pct}%
                     </td>
                     <td className="px-6 py-4 font-extrabold text-blue-700 font-mono">
-                      {job.processing_fps ? `${job.processing_fps.toFixed(1)} FPS` : '?"'}
+                      {job.processing_fps ? `${job.processing_fps.toFixed(1)} FPS` : '—'}
                     </td>
                     <td className="px-6 py-4 text-zinc-700 font-bold font-mono">
-                      {job.processing_time_ms ? `${(job.processing_time_ms / 1000).toFixed(1)}s` : '?"'}
+                      {job.processing_time_ms ? `${(job.processing_time_ms / 1000).toFixed(1)}s` : '—'}
                     </td>
                     <td className="px-6 py-4 text-right">
                       <button
