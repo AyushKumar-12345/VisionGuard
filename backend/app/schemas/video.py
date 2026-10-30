@@ -29,6 +29,7 @@ class VideoCreate(VideoBase):
 
 class VideoResponse(VideoBase):
     id: str
+    preview_url: str | None = None
     file_hash_sha256: str
     fps: float
     width: int

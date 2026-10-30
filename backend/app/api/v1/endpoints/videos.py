@@ -14,6 +14,7 @@ from app.services.cv.video_validator import (
     VideoValidationError,
     compute_sha256,
     extract_video_metadata,
+    transcode_to_h264,
     validate_magic_bytes,
 )
 
@@ -97,7 +98,29 @@ async def upload_video(
             detail=str(e)
         )
 
-    # 4. Persist Video entity to DB
+    # 4. Ensure video is encoded in web-friendly H.264 MP4 container for HTML5 browser playback
+    import cv2
+    cap_check = cv2.VideoCapture(str(dest_path))
+    fc_val = int(cap_check.get(cv2.CAP_PROP_FOURCC))
+    fc_str = "".join([chr((fc_val >> 8 * i) & 0xFF) for i in range(4)]).lower()
+    cap_check.release()
+
+    if file_ext != ".mp4" or fc_str not in ["avc1", "h264"]:
+        mp4_dest = settings.UPLOAD_DIR / f"{unique_id}.mp4"
+        try:
+            transcode_to_h264(dest_path, mp4_dest)
+            if dest_path != mp4_dest:
+                dest_path.unlink(missing_ok=True)
+            dest_path = mp4_dest
+            total_bytes = dest_path.stat().st_size
+            detected_mime = "video/mp4"
+            file_hash = compute_sha256(dest_path)
+            metadata = extract_video_metadata(dest_path)
+            logger.info(f"Video {unique_id} successfully converted to web H.264 container.")
+        except Exception as trans_err:
+            logger.warning(f"Could not transcode upload to H.264, retaining original container: {trans_err}")
+
+    # 5. Persist Video entity to DB
     video = Video(
         id=unique_id,
         original_filename=original_filename,

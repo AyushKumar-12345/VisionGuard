@@ -1,8 +1,22 @@
+import os
+import sys
 from contextlib import asynccontextmanager
+from pathlib import Path
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
+
+# Ensure Windows OpenCV video backend loads openh264 DLL
+if sys.platform == "win32":
+    backend_dir = str(Path(__file__).resolve().parent.parent)
+    if backend_dir not in os.environ.get("PATH", ""):
+        os.environ["PATH"] = backend_dir + os.pathsep + os.environ.get("PATH", "")
+    if hasattr(os, "add_dll_directory") and Path(backend_dir).exists():
+        try:
+            os.add_dll_directory(backend_dir)
+        except Exception:
+            pass
 
 from app.api.v1.router import api_router
 from app.core.config import settings

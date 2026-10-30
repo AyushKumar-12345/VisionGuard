@@ -1,5 +1,6 @@
 export interface VideoItem {
   id: string;
+  preview_url?: string;
   original_filename: string;
   file_size_bytes: number;
   mime_type: string;

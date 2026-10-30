@@ -271,12 +271,15 @@ export const VideosPage: React.FC<VideosPageProps> = ({
             </div>
 
             {/* Embedded Video Player */}
-            <div className="rounded-2xl overflow-hidden bg-black border-2 border-zinc-200 aspect-video flex items-center justify-center">
+            <div className="rounded-2xl overflow-hidden bg-zinc-950 border-2 border-zinc-200 aspect-video flex items-center justify-center relative">
               <video
+                key={previewVideo.id}
                 controls
                 autoPlay
+                playsInline
+                preload="auto"
                 className="w-full h-full object-contain"
-                src={`/media/uploads/${previewVideo.id}.mp4`}
+                src={previewVideo.preview_url || `/media/uploads/${previewVideo.id}.mp4`}
               >
                 Your browser does not support HTML5 video preview.
               </video>
@@ -284,9 +287,18 @@ export const VideosPage: React.FC<VideosPageProps> = ({
 
             {/* Modal Actions */}
             <div className="flex items-center justify-between pt-2">
-              <span className="text-xs font-mono font-bold text-zinc-500">
-                Size: {(previewVideo.file_size_bytes / (1024 * 1024)).toFixed(2)} MB
-              </span>
+              <div className="flex items-center gap-3">
+                <span className="text-xs font-mono font-bold text-zinc-500">
+                  Size: {(previewVideo.file_size_bytes / (1024 * 1024)).toFixed(2)} MB
+                </span>
+                <a
+                  href={previewVideo.preview_url || `/media/uploads/${previewVideo.id}.mp4`}
+                  download={previewVideo.original_filename}
+                  className="text-xs font-bold text-indigo-600 hover:text-indigo-800 underline flex items-center gap-1"
+                >
+                  Download Video File
+                </a>
+              </div>
               <div className="flex gap-2">
                 <button
                   onClick={() => setPreviewVideo(null)}

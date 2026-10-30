@@ -1,15 +1,17 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import {
   AlertCircle,
   Car,
   Download,
   Eye,
   FileText,
+  Film,
+  Layers,
   Loader2,
   Play,
+  RotateCcw,
   Sliders,
-  TrendingUp,
-  Video
+  TrendingUp
 } from 'lucide-react';
 import { JobDetail, ModelConfig, VideoItem } from '../types';
 import { createAnalysisJob, getJobResults, getJobStatus } from '../api/client';
@@ -45,6 +47,13 @@ export const AnalysisPage: React.FC<AnalysisPageProps> = ({
   const [submitting, setSubmitting] = useState<boolean>(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
+  // Video Player Enhancements
+  const [playerMode, setPlayerMode] = useState<'annotated' | 'raw'>('annotated');
+  const [playbackSpeed, setPlaybackSpeed] = useState<number>(1.0);
+  const [showTripwireOverlay, setShowTripwireOverlay] = useState<boolean>(true);
+  const [videoError, setVideoError] = useState<string | null>(null);
+  const videoRef = useRef<HTMLVideoElement>(null);
+
   useEffect(() => {
     if (selectedVideoId) {
       setVideoId(selectedVideoId);
@@ -67,6 +76,7 @@ export const AnalysisPage: React.FC<AnalysisPageProps> = ({
         if (statusData.status === 'COMPLETED') {
           const fullResults = await getJobResults(activeJobId);
           setJobDetail(fullResults);
+          setPlayerMode('annotated');
           onRefresh();
         } else if (statusData.status === 'FAILED') {
           setErrorMsg(statusData.error_message || 'Video analysis pipeline encountered an error.');
@@ -84,6 +94,13 @@ export const AnalysisPage: React.FC<AnalysisPageProps> = ({
       if (timer) clearTimeout(timer);
     };
   }, [activeJobId]);
+
+  // Synchronize playback speed
+  useEffect(() => {
+    if (videoRef.current) {
+      videoRef.current.playbackRate = playbackSpeed;
+    }
+  }, [playbackSpeed, playerMode, activeJobId]);
 
   const handleLaunchJob = async () => {
     if (!videoId) {
@@ -160,7 +177,14 @@ export const AnalysisPage: React.FC<AnalysisPageProps> = ({
             </label>
             <select
               value={videoId}
-              onChange={(e) => setVideoId(e.target.value)}
+              onChange={(e) => {
+                const nextId = e.target.value;
+                setVideoId(nextId);
+                setActiveJobId(null);
+                setJobDetail(null);
+                setPlayerMode('raw');
+                setVideoError(null);
+              }}
               className="w-full text-xs font-bold px-3 py-2.5 rounded-xl bg-white border-2 border-zinc-200 text-black focus:outline-none focus:border-indigo-600 focus:ring-2 focus:ring-indigo-100 shadow-xs"
             >
               {videos.map((v) => (
@@ -455,51 +479,193 @@ export const AnalysisPage: React.FC<AnalysisPageProps> = ({
             </div>
           )}
 
-          {/* Synchronized Video Player Display */}
-          <div className="bg-white rounded-2xl overflow-hidden shadow-md border-2 border-zinc-300 aspect-video flex flex-col items-center justify-center relative">
-            {jobDetail?.status === 'COMPLETED' && jobDetail.annotated_video_url ? (
-              <video
-                src={jobDetail.annotated_video_url}
-                controls
-                autoPlay
-                loop
-                className="w-full h-full object-contain bg-black"
-              />
-            ) : jobDetail?.status === 'PROCESSING' ? (
-              <div className="flex flex-col items-center gap-3.5 text-black p-8 text-center bg-zinc-50 w-full h-full justify-center">
-                <div className="p-4 rounded-2xl bg-indigo-100 text-indigo-700">
-                  <Loader2 className="w-10 h-10 animate-spin text-indigo-600" />
-                </div>
-                <span className="text-base font-black text-black">
-                  Processing Surveillance Frames ({jobDetail.progress_pct}%)...
-                </span>
-                <span className="text-xs font-semibold text-zinc-600 max-w-md">
-                  Executing YOLOv8 neural detection, ByteTrack two-stage Kalman filter tracking, virtual counting line intersection, and OpenCV annotated video re-encoding.
-                </span>
+          {/* Synchronized Video Player Section */}
+          <div className="bg-white p-5 rounded-2xl border-2 border-zinc-200 shadow-sm space-y-3">
+            {/* Player Toolbar */}
+            <div className="flex flex-wrap items-center justify-between gap-3 pb-3 border-b-2 border-zinc-100">
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setPlayerMode('annotated');
+                    setVideoError(null);
+                  }}
+                  disabled={!jobDetail || jobDetail.status !== 'COMPLETED' || !jobDetail.annotated_video_url}
+                  className={`px-3 py-1.5 rounded-xl text-xs font-black transition-all flex items-center gap-1.5 cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed ${
+                    playerMode === 'annotated' && jobDetail?.status === 'COMPLETED'
+                      ? 'bg-indigo-600 text-white shadow-md shadow-indigo-600/25'
+                      : 'bg-zinc-100 text-zinc-700 hover:bg-zinc-200'
+                  }`}
+                >
+                  <Layers className="w-3.5 h-3.5" />
+                  <span>Annotated AI Stream</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setPlayerMode('raw');
+                    setVideoError(null);
+                  }}
+                  className={`px-3 py-1.5 rounded-xl text-xs font-black transition-all flex items-center gap-1.5 cursor-pointer ${
+                    playerMode === 'raw' || !jobDetail || jobDetail.status !== 'COMPLETED'
+                      ? 'bg-indigo-600 text-white shadow-md shadow-indigo-600/25'
+                      : 'bg-zinc-100 text-zinc-700 hover:bg-zinc-200'
+                  }`}
+                >
+                  <Film className="w-3.5 h-3.5" />
+                  <span>Raw Video Stream</span>
+                </button>
               </div>
-            ) : selectedVideo ? (
-              <div className="flex flex-col items-center gap-3 text-black p-8 text-center bg-zinc-50 w-full h-full justify-center">
-                <div className="p-4 rounded-2xl bg-blue-100 text-blue-700">
-                  <Video className="w-10 h-10 text-blue-700" />
+
+              {/* Playback Controls & Speed */}
+              <div className="flex items-center gap-3">
+                {/* Tripwire Line Visual Overlay Toggle */}
+                {selectedVideo && (
+                  <label className="flex items-center gap-1.5 text-xs font-bold text-zinc-700 cursor-pointer select-none">
+                    <input
+                      type="checkbox"
+                      checked={showTripwireOverlay}
+                      onChange={(e) => setShowTripwireOverlay(e.target.checked)}
+                      className="rounded border-zinc-300 text-indigo-600 focus:ring-indigo-500 w-3.5 h-3.5 cursor-pointer"
+                    />
+                    <span>Tripwire Overlay</span>
+                  </label>
+                )}
+
+                {/* Speed Selector */}
+                <div className="flex items-center gap-1 text-xs font-bold text-zinc-600">
+                  <span className="hidden sm:inline">Speed:</span>
+                  {[0.5, 1.0, 1.5, 2.0].map((rate) => (
+                    <button
+                      key={rate}
+                      type="button"
+                      onClick={() => {
+                        setPlaybackSpeed(rate);
+                        if (videoRef.current) videoRef.current.playbackRate = rate;
+                      }}
+                      className={`px-2 py-0.5 rounded-md font-mono text-xs font-bold transition-all cursor-pointer ${
+                        playbackSpeed === rate
+                          ? 'bg-black text-white'
+                          : 'bg-zinc-100 hover:bg-zinc-200 text-zinc-700'
+                      }`}
+                    >
+                      {rate}x
+                    </button>
+                  ))}
                 </div>
-                <span className="text-base font-black text-black">{selectedVideo.original_filename}</span>
-                <div className="flex flex-wrap gap-2 justify-center">
-                  <span className="px-2.5 py-1 rounded bg-cyan-100 text-cyan-900 border border-cyan-300 text-xs font-bold">
-                    {selectedVideo.width} &times; {selectedVideo.height}
+
+                {/* Restart Button */}
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (videoRef.current) {
+                      videoRef.current.currentTime = 0;
+                      videoRef.current.play();
+                    }
+                  }}
+                  className="p-1.5 rounded-lg bg-zinc-100 hover:bg-zinc-200 text-zinc-800 transition-all cursor-pointer"
+                  title="Restart stream from beginning"
+                >
+                  <RotateCcw className="w-3.5 h-3.5" />
+                </button>
+              </div>
+            </div>
+
+            {/* Video Canvas Container */}
+            <div className="bg-zinc-950 rounded-2xl overflow-hidden shadow-md border-2 border-zinc-300 aspect-video flex flex-col items-center justify-center relative">
+              {jobDetail?.status === 'PROCESSING' ? (
+                <div className="flex flex-col items-center gap-3.5 text-black p-8 text-center bg-zinc-50 w-full h-full justify-center">
+                  <div className="p-4 rounded-2xl bg-indigo-100 text-indigo-700">
+                    <Loader2 className="w-10 h-10 animate-spin text-indigo-600" />
+                  </div>
+                  <span className="text-base font-black text-black">
+                    Processing Surveillance Frames ({jobDetail.progress_pct}%)...
                   </span>
-                  <span className="px-2.5 py-1 rounded bg-purple-100 text-purple-900 border border-purple-300 text-xs font-bold">
-                    {selectedVideo.total_frames} Frames
-                  </span>
-                  <span className="px-2.5 py-1 rounded bg-emerald-100 text-emerald-900 border border-emerald-300 text-xs font-bold">
-                    Ready For Pipeline
+                  <span className="text-xs font-semibold text-zinc-600 max-w-md">
+                    Executing YOLOv8 neural detection, ByteTrack two-stage Kalman filter tracking, virtual counting line intersection, and OpenCV annotated video re-encoding.
                   </span>
                 </div>
-              </div>
-            ) : (
-              <div className="text-zinc-600 text-xs font-bold text-center p-8 bg-zinc-50 w-full h-full flex items-center justify-center">
-                No video loaded. Select a video from the library to configure and analyze.
-              </div>
-            )}
+              ) : selectedVideo ? (
+                <>
+                  <video
+                    ref={videoRef}
+                    key={`${playerMode}-${jobDetail?.id || videoId}`}
+                    src={
+                      playerMode === 'annotated' && jobDetail?.status === 'COMPLETED' && jobDetail.annotated_video_url
+                        ? jobDetail.annotated_video_url
+                        : selectedVideo.preview_url || `/media/uploads/${selectedVideo.id}.mp4`
+                    }
+                    controls
+                    autoPlay
+                    loop
+                    playsInline
+                    preload="auto"
+                    onError={(e) => {
+                      console.error('Video stream error', e);
+                      setVideoError('Unable to decode video format in this browser. Please verify H.264 codecs.');
+                    }}
+                    className="w-full h-full object-contain bg-black"
+                  />
+
+                  {/* Dynamic SVG Virtual Tripwire Overlay on Raw Video Stream */}
+                  {showTripwireOverlay && (playerMode === 'raw' || !jobDetail || jobDetail.status !== 'COMPLETED') && (
+                    <svg
+                      className="absolute inset-0 w-full h-full pointer-events-none"
+                      viewBox={`0 0 ${selectedVideo.width || 1280} ${selectedVideo.height || 720}`}
+                      preserveAspectRatio="xMidYMid meet"
+                    >
+                      <line
+                        x1={startX}
+                        y1={startY}
+                        x2={endX}
+                        y2={endY}
+                        stroke="#00e5ff"
+                        strokeWidth="5"
+                        strokeDasharray="10 5"
+                      />
+                      <circle cx={startX} cy={startY} r="8" fill="#f59e0b" stroke="#ffffff" strokeWidth="2.5" />
+                      <circle cx={endX} cy={endY} r="8" fill="#ec4899" stroke="#ffffff" strokeWidth="2.5" />
+                      <text
+                        x={(startX + endX) / 2}
+                        y={(startY + endY) / 2 - 12}
+                        fill="#00e5ff"
+                        fontSize="18"
+                        fontWeight="900"
+                        textAnchor="middle"
+                        stroke="#000000"
+                        strokeWidth="4"
+                        paintOrder="stroke"
+                      >
+                        {lineName} [Tripwire]
+                      </text>
+                    </svg>
+                  )}
+                </>
+              ) : (
+                <div className="text-zinc-400 text-xs font-bold text-center p-8 bg-zinc-950 w-full h-full flex items-center justify-center">
+                  No video loaded. Select a video from the library to configure and analyze.
+                </div>
+              )}
+
+              {/* Error banner if browser failed to decode */}
+              {videoError && (
+                <div className="absolute bottom-3 left-3 right-3 p-3 rounded-xl bg-rose-600/95 text-white text-xs font-bold flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <AlertCircle className="w-4 h-4 flex-shrink-0" />
+                    <span>{videoError}</span>
+                  </div>
+                  {selectedVideo && (
+                    <a
+                      href={selectedVideo.preview_url || `/media/uploads/${selectedVideo.id}.mp4`}
+                      download
+                      className="underline text-white font-black hover:text-zinc-200"
+                    >
+                      Download Video
+                    </a>
+                  )}
+                </div>
+              )}
+            </div>
           </div>
 
           {/* Report Export Bar (Visible when completed) */}

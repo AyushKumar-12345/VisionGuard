@@ -134,17 +134,34 @@ def _process_video_sync(job_id: str) -> None:
         )
         line_counter = VirtualLineCounter(line_segment)
 
-    # 3. Setup Annotated Output Video Writer
+    # 3. Setup Annotated Output Video Writer (H.264 avc1 for web browser playback)
     annotated_filename = f"annotated_{job_id}.mp4"
     annotated_output_path = settings.ANNOTATED_DIR / annotated_filename
-    fourcc = cv2.VideoWriter_fourcc(*"mp4v")
     out_fps = video_fps / frame_skip
-    writer = cv2.VideoWriter(
-        str(annotated_output_path),
-        fourcc,
-        out_fps,
-        (video_w, video_h)
-    )
+    try:
+        fourcc = cv2.VideoWriter_fourcc(*"avc1")
+        writer = cv2.VideoWriter(
+            str(annotated_output_path),
+            fourcc,
+            out_fps,
+            (video_w, video_h)
+        )
+        if not writer.isOpened():
+            fourcc = cv2.VideoWriter_fourcc(*"mp4v")
+            writer = cv2.VideoWriter(
+                str(annotated_output_path),
+                fourcc,
+                out_fps,
+                (video_w, video_h)
+            )
+    except Exception:
+        fourcc = cv2.VideoWriter_fourcc(*"mp4v")
+        writer = cv2.VideoWriter(
+            str(annotated_output_path),
+            fourcc,
+            out_fps,
+            (video_w, video_h)
+        )
 
     # 4. Initialize YOLO model and ByteTrack
     model = ModelRegistry.get_model(model_name)

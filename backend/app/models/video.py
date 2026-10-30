@@ -47,3 +47,10 @@ class Video(Base):
         cascade="all, delete-orphan",
         lazy="selectin"
     )
+
+    @property
+    def preview_url(self) -> str:
+        """Relative URL path for web stream playback."""
+        from pathlib import Path
+        filename = Path(self.storage_path).name
+        return f"/media/uploads/{filename}"

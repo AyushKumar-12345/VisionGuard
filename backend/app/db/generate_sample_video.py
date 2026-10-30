@@ -11,8 +11,16 @@ def generate_sample_traffic_video(output_path: Path, num_frames: int = 150, fps:
     """
     output_path.parent.mkdir(parents=True, exist_ok=True)
     w, h = 1280, 720
-    fourcc = cv2.VideoWriter_fourcc(*"mp4v")
-    out = cv2.VideoWriter(str(output_path), fourcc, float(fps), (w, h))
+    # Prefer H.264 (avc1) for native HTML5 browser playback
+    try:
+        fourcc = cv2.VideoWriter_fourcc(*"avc1")
+        out = cv2.VideoWriter(str(output_path), fourcc, float(fps), (w, h))
+        if not out.isOpened():
+            fourcc = cv2.VideoWriter_fourcc(*"mp4v")
+            out = cv2.VideoWriter(str(output_path), fourcc, float(fps), (w, h))
+    except Exception:
+        fourcc = cv2.VideoWriter_fourcc(*"mp4v")
+        out = cv2.VideoWriter(str(output_path), fourcc, float(fps), (w, h))
 
     # Vehicle initial states: [x, y, vx, vy, w, h, color, class_name]
     vehicles = [
