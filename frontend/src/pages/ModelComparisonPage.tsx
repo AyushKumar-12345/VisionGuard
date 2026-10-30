@@ -17,6 +17,7 @@ export const ModelComparisonPage: React.FC = () => {
   const [loading, setLoading] = useState<boolean>(true);
   const [evaluatingModel, setEvaluatingModel] = useState<string | null>(null);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
+  const [successMsg, setSuccessMsg] = useState<string | null>(null);
   const [comparisonSummary, setComparisonSummary] = useState<string | null>(null);
 
   const fetchRuns = async () => {
@@ -42,8 +43,10 @@ export const ModelComparisonPage: React.FC = () => {
   const handleRunEvaluation = async (modelName: string) => {
     setEvaluatingModel(modelName);
     setErrorMsg(null);
+    setSuccessMsg(null);
     try {
       await runEvaluation(modelName);
+      setSuccessMsg(`Successfully executed live benchmark evaluation for ${modelName.toUpperCase()}!`);
       await fetchRuns();
     } catch (err: any) {
       setErrorMsg(err.response?.data?.detail || `Failed to evaluate ${modelName}`);
@@ -128,8 +131,29 @@ export const ModelComparisonPage: React.FC = () => {
       </div>
 
       {errorMsg && (
-        <div className="p-4 rounded-xl bg-rose-50 border-2 border-rose-300 text-xs text-rose-800 font-bold flex items-center gap-2">
+        <div className="p-4 rounded-xl bg-rose-50 border-2 border-rose-300 text-xs text-rose-800 font-bold flex items-center justify-between">
           <span>{errorMsg}</span>
+          <button onClick={() => setErrorMsg(null)} className="text-rose-600 hover:text-rose-900 font-black ml-4">✕</button>
+        </div>
+      )}
+
+      {successMsg && (
+        <div className="p-4 rounded-xl bg-emerald-50 border-2 border-emerald-300 text-xs text-emerald-900 font-bold flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <span className="w-2 h-2 rounded-full bg-emerald-600"></span>
+            <span>{successMsg}</span>
+          </div>
+          <button onClick={() => setSuccessMsg(null)} className="text-emerald-700 hover:text-emerald-950 font-black ml-4">✕</button>
+        </div>
+      )}
+
+      {evaluatingModel && (
+        <div className="p-4 rounded-xl bg-indigo-50 border-2 border-indigo-300 text-xs text-indigo-900 font-bold flex items-center gap-3 animate-pulse">
+          <Loader2 className="w-4 h-4 animate-spin text-indigo-700 shrink-0" />
+          <div>
+            <span className="font-black">Active Inference: </span>
+            <span>Running live evaluation for <b>{evaluatingModel.toUpperCase()}</b> against the Ground-Truth dataset (warmup + multi-thread CPU inferencing). Please wait ~5-20 seconds...</span>
+          </div>
         </div>
       )}
 

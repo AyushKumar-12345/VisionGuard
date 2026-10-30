@@ -10,14 +10,17 @@ start "VisionGuard Backend" cmd /k "cd /d %~dp0 && .\.venv\Scripts\python.exe -m
 
 timeout /t 2 /nobreak >nul
 
-echo [2/3] Starting Frontend Server on http://localhost:5173 ...
+echo [2/3] Starting Frontend Server on http://localhost:5174 ...
 start "VisionGuard Frontend" cmd /k "cd /d %~dp0frontend && npm run dev"
 
 timeout /t 2 /nobreak >nul
 
-echo [3/3] Opening Browser at http://localhost:5173 ...
-start http://localhost:5173
+echo [3/3] Opening Browser at http://localhost:5174 ...
+start http://localhost:5174
 
 echo.
 echo VisionGuard is running!
+echo Dashboard: http://localhost:5174
+echo Swagger API: http://127.0.0.1:8000/docs
 echo Keep the opened command prompt windows running.
+

@@ -31,27 +31,27 @@ export const Navbar: React.FC<NavbarProps> = ({ activeTab, setActiveTab, health 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-20">
           {/* Logo & Brand */}
-          <div className="flex items-center gap-3.5 cursor-pointer" onClick={() => setActiveTab('overview')}>
-            <div className="w-11 h-11 rounded-xl bg-gradient-to-tr from-blue-600 via-indigo-600 to-violet-600 flex items-center justify-center text-white shadow-md shadow-indigo-500/25">
-              <ShieldCheck className="w-6 h-6 text-white" />
+          <div className="flex items-center gap-3 cursor-pointer shrink-0" onClick={() => setActiveTab('overview')}>
+            <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-blue-600 via-indigo-600 to-violet-600 flex items-center justify-center text-white shadow-md shadow-indigo-500/25">
+              <ShieldCheck className="w-5 h-5 text-white" />
             </div>
             <div>
-              <div className="flex items-center gap-2">
-                <span className="text-2xl font-black tracking-tight text-black">
+              <div className="flex items-center gap-1.5">
+                <span className="text-xl sm:text-2xl font-black tracking-tight text-black">
                   Vision<span className="text-indigo-600">Guard</span>
                 </span>
-                <span className="hidden md:inline-flex items-center px-2 py-0.5 rounded-md text-[11px] font-black uppercase tracking-wider bg-indigo-50 text-indigo-700 border border-indigo-200">
+                <span className="hidden xl:inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-black uppercase tracking-wider bg-indigo-50 text-indigo-700 border border-indigo-200">
                   CV Engine v1.0
                 </span>
               </div>
-              <p className="hidden sm:block text-xs font-semibold text-zinc-600">
+              <p className="hidden 2xl:block text-[11px] font-semibold text-zinc-600">
                 Multi-Model Traffic Intelligence & Vehicle Analytics
               </p>
             </div>
           </div>
 
           {/* Navigation Tabs */}
-          <nav className="flex space-x-1 sm:space-x-1.5">
+          <nav className="flex items-center gap-1 sm:gap-1.5 overflow-x-auto py-1">
             {navItems.map((item) => {
               const Icon = item.icon;
               const isActive = activeTab === item.id;
@@ -59,14 +59,20 @@ export const Navbar: React.FC<NavbarProps> = ({ activeTab, setActiveTab, health 
                 <button
                   key={item.id}
                   onClick={() => setActiveTab(item.id)}
-                  className={`flex items-center gap-2 px-3.5 py-2.5 text-xs sm:text-sm font-bold rounded-xl transition-all ${
+                  className={`flex items-center gap-1.5 sm:gap-2 px-2.5 py-2 sm:px-3.5 sm:py-2.5 text-xs sm:text-sm font-black rounded-xl transition-all whitespace-nowrap cursor-pointer ${
                     isActive
                       ? 'bg-indigo-600 text-white shadow-md shadow-indigo-600/30'
                       : 'text-black hover:text-indigo-600 hover:bg-zinc-100'
                   }`}
                 >
-                  <Icon className={`w-4 h-4 ${isActive ? 'text-white' : item.color}`} />
-                  <span className="hidden md:inline">{item.label}</span>
+                  <Icon className={`w-4 h-4 shrink-0 ${isActive ? 'text-white' : item.color}`} />
+                  <span className="hidden lg:inline">{item.label}</span>
+                  <span className="inline lg:hidden text-xs">
+                    {item.id === 'overview' ? 'Overview' :
+                     item.id === 'videos' ? 'Videos' :
+                     item.id === 'analysis' ? 'Analysis' :
+                     item.id === 'analytics' ? 'Analytics' : 'Benchmark'}
+                  </span>
                 </button>
               );
             })}
