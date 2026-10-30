@@ -49,7 +49,8 @@ app = FastAPI(
 # CORS Configuration
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=settings.ALLOWED_ORIGINS,
+    allow_origins=settings.ALLOWED_ORIGINS + ["https://visionguard-frontend.onrender.com"],
+    allow_origin_regex=r"https?://.*\.onrender\.com.*",
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

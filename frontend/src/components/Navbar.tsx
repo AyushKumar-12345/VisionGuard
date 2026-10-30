@@ -116,7 +116,7 @@ export const Navbar: React.FC<NavbarProps> = ({ activeTab, setActiveTab, health 
                   <Cpu className="w-3.5 h-3.5 text-blue-600" />
                   <span className="text-zinc-600 font-semibold">CPU:</span>
                   <span className="text-blue-600 font-extrabold">
-                    {health?.system_resources.cpu_usage_pct ?? 0}%
+                    {health?.system_resources?.cpu_usage_pct ?? 0}%
                   </span>
                 </div>
                 <span className="text-zinc-300">|</span>
@@ -124,7 +124,7 @@ export const Navbar: React.FC<NavbarProps> = ({ activeTab, setActiveTab, health 
                   <HardDrive className="w-3.5 h-3.5 text-purple-600" />
                   <span className="text-zinc-600 font-semibold">RAM:</span>
                   <span className="text-purple-600 font-extrabold">
-                    {health?.system_resources.memory_used_gb ?? 0} GB
+                    {health?.system_resources?.memory_used_gb ?? 0} GB
                   </span>
                 </div>
               </div>
@@ -186,12 +186,12 @@ export const Navbar: React.FC<NavbarProps> = ({ activeTab, setActiveTab, health 
                   <span className="flex items-center gap-1 text-zinc-700">
                     <Cpu className="w-3.5 h-3.5 text-blue-600" /> CPU Utilization
                   </span>
-                  <span className="text-blue-700 font-black font-mono">{health?.system_resources.cpu_usage_pct ?? 0}%</span>
+                  <span className="text-blue-700 font-black font-mono">{health?.system_resources?.cpu_usage_pct ?? 0}%</span>
                 </div>
                 <div className="w-full bg-zinc-200 rounded-full h-2 overflow-hidden">
                   <div
                     className="bg-blue-600 h-2 rounded-full transition-all duration-300"
-                    style={{ width: `${Math.min(100, health?.system_resources.cpu_usage_pct ?? 0)}%` }}
+                    style={{ width: `${Math.min(100, health?.system_resources?.cpu_usage_pct ?? 0)}%` }}
                   ></div>
                 </div>
               </div>
@@ -203,7 +203,7 @@ export const Navbar: React.FC<NavbarProps> = ({ activeTab, setActiveTab, health 
                     <HardDrive className="w-3.5 h-3.5 text-purple-600" /> RAM Memory
                   </span>
                   <span className="text-purple-700 font-black font-mono">
-                    {health?.system_resources.memory_used_gb ?? 0} GB / {health?.system_resources.memory_total_gb ?? 32} GB
+                    {health?.system_resources?.memory_used_gb ?? 0} GB / {health?.system_resources?.memory_total_gb ?? 32} GB
                   </span>
                 </div>
                 <div className="w-full bg-zinc-200 rounded-full h-2 overflow-hidden">
@@ -212,7 +212,7 @@ export const Navbar: React.FC<NavbarProps> = ({ activeTab, setActiveTab, health 
                     style={{
                       width: `${Math.min(
                         100,
-                        (((health?.system_resources.memory_used_gb ?? 0) / (health?.system_resources.memory_total_gb ?? 32)) * 100)
+                        (((health?.system_resources?.memory_used_gb ?? 0) / (health?.system_resources?.memory_total_gb ?? 32)) * 100)
                       )}%`,
                     }}
                   ></div>
@@ -226,19 +226,19 @@ export const Navbar: React.FC<NavbarProps> = ({ activeTab, setActiveTab, health 
               <div className="grid grid-cols-2 gap-2 text-[11px] font-bold">
                 <div className="p-2 bg-zinc-100 rounded-lg">
                   <span className="text-zinc-500 block text-[10px]">Processor</span>
-                  <span className="text-black">{health?.environment.device_name || 'Intel Core Ultra 9'}</span>
+                  <span className="text-black">{health?.environment?.device_name || 'Intel Core Ultra 9'}</span>
                 </div>
                 <div className="p-2 bg-zinc-100 rounded-lg">
                   <span className="text-zinc-500 block text-[10px]">Inference Threads</span>
-                  <span className="text-indigo-700 font-black font-mono">{health?.environment.inference_threads || 16} Worker Cores</span>
+                  <span className="text-indigo-700 font-black font-mono">{health?.environment?.inference_threads || 16} Worker Cores</span>
                 </div>
                 <div className="p-2 bg-zinc-100 rounded-lg">
                   <span className="text-zinc-500 block text-[10px]">Torch Runtime</span>
-                  <span className="text-black font-mono">{health?.environment.torch_version || '2.2+ CPU'}</span>
+                  <span className="text-black font-mono">{health?.environment?.torch_version || '2.2+ CPU'}</span>
                 </div>
                 <div className="p-2 bg-zinc-100 rounded-lg">
                   <span className="text-zinc-500 block text-[10px]">Python Engine</span>
-                  <span className="text-black font-mono">{health?.environment.python_version || '3.12.10'}</span>
+                  <span className="text-black font-mono">{health?.environment?.python_version || '3.12.10'}</span>
                 </div>
               </div>
             </div>

@@ -205,13 +205,13 @@ export const OverviewPage: React.FC<OverviewPageProps> = ({
                     CPU Compute Utilization
                   </span>
                   <span className="font-extrabold text-blue-600 font-mono">
-                    {health?.system_resources.cpu_usage_pct ?? 0}%
+                    {health?.system_resources?.cpu_usage_pct ?? 0}%
                   </span>
                 </div>
                 <div className="w-full bg-zinc-100 rounded-full h-2.5 overflow-hidden border border-zinc-200">
                   <div
                     className="h-2.5 rounded-full bg-gradient-to-r from-blue-600 to-indigo-600 transition-all duration-300"
-                    style={{ width: `${health?.system_resources.cpu_usage_pct ?? 0}%` }}
+                    style={{ width: `${health?.system_resources?.cpu_usage_pct ?? 0}%` }}
                   />
                 </div>
               </div>
@@ -223,7 +223,7 @@ export const OverviewPage: React.FC<OverviewPageProps> = ({
                     Memory Allocation
                   </span>
                   <span className="font-extrabold text-purple-600 font-mono">
-                    {health?.system_resources.memory_used_gb ?? 0} GB / {health?.system_resources.memory_total_gb ?? 0} GB
+                    {health?.system_resources?.memory_used_gb ?? 0} GB / {health?.system_resources?.memory_total_gb ?? 0} GB
                   </span>
                 </div>
                 <div className="w-full bg-zinc-100 rounded-full h-2.5 overflow-hidden border border-zinc-200">
@@ -231,8 +231,8 @@ export const OverviewPage: React.FC<OverviewPageProps> = ({
                     className="h-2.5 rounded-full bg-gradient-to-r from-purple-600 to-violet-600 transition-all duration-300"
                     style={{
                       width: `${
-                        health?.system_resources.memory_total_gb
-                          ? ((health.system_resources.memory_used_gb / health.system_resources.memory_total_gb) * 100).toFixed(0)
+                        health?.system_resources?.memory_total_gb
+                          ? (((health?.system_resources?.memory_used_gb ?? 0) / health.system_resources.memory_total_gb) * 100).toFixed(0)
                           : 0
                       }%`,
                     }}
@@ -244,7 +244,7 @@ export const OverviewPage: React.FC<OverviewPageProps> = ({
                 <div className="flex justify-between py-1 font-bold">
                   <span className="text-zinc-600">Runtime Processor:</span>
                   <span className="text-black font-extrabold font-mono text-[11px]">
-                    {health?.environment.device_name || 'Intel / AMD x86_64'}
+                    {health?.environment?.device_name || 'Intel / AMD x86_64'}
                   </span>
                 </div>
                 <div className="flex justify-between py-1 font-bold">

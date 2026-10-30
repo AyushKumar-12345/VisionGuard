@@ -10,7 +10,28 @@ import {
   VideoItem
 } from '../types';
 
-const API_BASE = '/api/v1';
+export const getBackendBaseUrl = (): string => {
+  const envUrl = import.meta.env.VITE_API_BASE_URL;
+  if (envUrl) {
+    const formatted = envUrl.startsWith('http') ? envUrl : `https://${envUrl}`;
+    return formatted.replace(/\/$/, '');
+  }
+  if (typeof window !== 'undefined' && window.location.hostname.includes('onrender.com')) {
+    const backendHost = window.location.hostname.replace('visionguard-frontend', 'visionguard-backend');
+    return `https://${backendHost}`;
+  }
+  return '';
+};
+
+export const resolveMediaUrl = (path: string | null | undefined): string => {
+  if (!path) return '';
+  if (path.startsWith('http://') || path.startsWith('https://')) return path;
+  const base = getBackendBaseUrl();
+  const cleanPath = path.startsWith('/') ? path : `/${path}`;
+  return `${base}${cleanPath}`;
+};
+
+const API_BASE = `${getBackendBaseUrl()}/api/v1`;
 
 export const api = axios.create({
   baseURL: API_BASE,
@@ -21,6 +42,9 @@ export const api = axios.create({
 
 export const getHealth = async (): Promise<HealthStatus> => {
   const res = await api.get<HealthStatus>('/health');
+  if (typeof res.data !== 'object' || !res.data || !('status' in res.data)) {
+    throw new Error('Invalid health response');
+  }
   return res.data;
 };
 

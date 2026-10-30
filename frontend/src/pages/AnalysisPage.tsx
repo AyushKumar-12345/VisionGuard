@@ -15,7 +15,7 @@ import {
   TrendingUp
 } from 'lucide-react';
 import { JobDetail, ModelConfig, VideoItem } from '../types';
-import { createAnalysisJob, getJobResults, getJobStatus } from '../api/client';
+import { createAnalysisJob, getJobResults, getJobStatus, resolveMediaUrl } from '../api/client';
 
 interface AnalysisPageProps {
   videos: VideoItem[];
@@ -649,11 +649,11 @@ export const AnalysisPage: React.FC<AnalysisPageProps> = ({
                   <video
                     ref={videoRef}
                     key={`${playerMode}-${jobDetail?.id || videoId}`}
-                    src={
+                    src={resolveMediaUrl(
                       playerMode === 'annotated' && jobDetail?.status === 'COMPLETED' && jobDetail.annotated_video_url
                         ? jobDetail.annotated_video_url
                         : selectedVideo.preview_url || `/media/uploads/${selectedVideo.id}.mp4`
-                    }
+                    )}
                     controls
                     autoPlay
                     loop
@@ -715,7 +715,7 @@ export const AnalysisPage: React.FC<AnalysisPageProps> = ({
                   </div>
                   {selectedVideo && (
                     <a
-                      href={selectedVideo.preview_url || `/media/uploads/${selectedVideo.id}.mp4`}
+                      href={resolveMediaUrl(selectedVideo.preview_url || `/media/uploads/${selectedVideo.id}.mp4`)}
                       download
                       className="underline text-white font-black hover:text-zinc-200"
                     >
@@ -736,7 +736,7 @@ export const AnalysisPage: React.FC<AnalysisPageProps> = ({
               </div>
               <div className="flex gap-2.5">
                 <a
-                  href={`/api/v1/reports/${jobDetail.id}/export?format=pdf`}
+                  href={resolveMediaUrl(`/api/v1/reports/${jobDetail.id}/export?format=pdf`)}
                   download
                   className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-rose-600 text-white text-xs font-black hover:bg-rose-700 transition-all shadow-md shadow-rose-600/25"
                 >
@@ -744,7 +744,7 @@ export const AnalysisPage: React.FC<AnalysisPageProps> = ({
                   <span>Download PDF Report</span>
                 </a>
                 <a
-                  href={`/api/v1/reports/${jobDetail.id}/export?format=json`}
+                  href={resolveMediaUrl(`/api/v1/reports/${jobDetail.id}/export?format=json`)}
                   download
                   className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-indigo-600 text-white text-xs font-black hover:bg-indigo-700 transition-all shadow-md shadow-indigo-600/25"
                 >

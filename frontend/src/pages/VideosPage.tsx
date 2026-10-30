@@ -13,7 +13,7 @@ import {
   X
 } from 'lucide-react';
 import { VideoItem } from '../types';
-import { deleteVideo, uploadVideo } from '../api/client';
+import { deleteVideo, resolveMediaUrl, uploadVideo } from '../api/client';
 
 interface VideosPageProps {
   videos: VideoItem[];
@@ -251,7 +251,7 @@ export const VideosPage: React.FC<VideosPageProps> = ({
 
                       {/* Download Button */}
                       <a
-                        href={v.preview_url || `/media/uploads/${v.id}.mp4`}
+                        href={resolveMediaUrl(v.preview_url || `/media/uploads/${v.id}.mp4`)}
                         download={v.original_filename}
                         className="inline-flex items-center gap-1 text-xs font-black px-2.5 py-2 rounded-xl bg-zinc-100 hover:bg-zinc-200 text-black transition-all cursor-pointer shadow-xs"
                         title="Download raw video file"
@@ -318,7 +318,7 @@ export const VideosPage: React.FC<VideosPageProps> = ({
                 playsInline
                 preload="auto"
                 className="w-full h-full object-contain"
-                src={previewVideo.preview_url || `/media/uploads/${previewVideo.id}.mp4`}
+                src={resolveMediaUrl(previewVideo.preview_url || `/media/uploads/${previewVideo.id}.mp4`)}
               >
                 Your browser does not support HTML5 video preview.
               </video>
@@ -331,7 +331,7 @@ export const VideosPage: React.FC<VideosPageProps> = ({
                   Size: {(previewVideo.file_size_bytes / (1024 * 1024)).toFixed(2)} MB
                 </span>
                 <a
-                  href={previewVideo.preview_url || `/media/uploads/${previewVideo.id}.mp4`}
+                  href={resolveMediaUrl(previewVideo.preview_url || `/media/uploads/${previewVideo.id}.mp4`)}
                   download={previewVideo.original_filename}
                   className="text-xs font-bold text-indigo-600 hover:text-indigo-800 underline flex items-center gap-1"
                 >
