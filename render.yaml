@@ -30,3 +30,4 @@ services:
       - type: rewrite
         source: /*
         destination: /index.html
+
