@@ -34,13 +34,12 @@ WORKDIR /app
 COPY --from=builder /usr/local/lib/python3.12/site-packages /usr/local/lib/python3.12/site-packages
 COPY --from=builder /usr/local/bin /usr/local/bin
 
-# Copy backend application code and data
+# Copy backend application code
 COPY backend /app/backend
-COPY data /app/data
 
 WORKDIR /app/backend
 
-# Create unprivileged user for security
+# Create unprivileged user and storage directories
 RUN useradd -m -u 1000 appuser && \
     mkdir -p /app/data/uploads /app/data/annotated /app/data/reports /app/data/weights /app/data/evaluations && \
     chown -R appuser:appuser /app
