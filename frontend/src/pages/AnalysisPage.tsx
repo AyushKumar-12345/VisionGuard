@@ -291,6 +291,65 @@ export const AnalysisPage: React.FC<AnalysisPageProps> = ({
               />
             </div>
 
+            {/* Quick Tripwire Presets */}
+            <div>
+              <span className="text-[11px] font-bold text-zinc-600 block mb-1.5">Quick Geometric Presets:</span>
+              <div className="grid grid-cols-2 gap-1.5">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setLineName('Midpoint Screen Line');
+                    setStartX(640);
+                    setStartY(0);
+                    setEndX(640);
+                    setEndY(720);
+                  }}
+                  className="px-2 py-1.5 rounded-lg bg-zinc-100 hover:bg-zinc-200 text-black text-[11px] font-bold text-left border border-zinc-200 transition-all cursor-pointer"
+                >
+                  Midpoint Vertical
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setLineName('Center Highway Gate');
+                    setStartX(0);
+                    setStartY(360);
+                    setEndX(1280);
+                    setEndY(360);
+                  }}
+                  className="px-2 py-1.5 rounded-lg bg-zinc-100 hover:bg-zinc-200 text-black text-[11px] font-bold text-left border border-zinc-200 transition-all cursor-pointer"
+                >
+                  Center Horizontal
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setLineName('Inbound Left Lane');
+                    setStartX(320);
+                    setStartY(120);
+                    setEndX(320);
+                    setEndY(680);
+                  }}
+                  className="px-2 py-1.5 rounded-lg bg-zinc-100 hover:bg-zinc-200 text-black text-[11px] font-bold text-left border border-zinc-200 transition-all cursor-pointer"
+                >
+                  Inbound Left Lane
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setLineName('Outbound Right Lane');
+                    setStartX(960);
+                    setStartY(120);
+                    setEndX(960);
+                    setEndY(680);
+                  }}
+                  className="px-2 py-1.5 rounded-lg bg-zinc-100 hover:bg-zinc-200 text-black text-[11px] font-bold text-left border border-zinc-200 transition-all cursor-pointer"
+                >
+                  Outbound Right Lane
+                </button>
+              </div>
+            </div>
+
             <div className="grid grid-cols-2 gap-3 text-xs">
               <div className="p-2.5 rounded-xl bg-cyan-50/50 border border-cyan-200">
                 <label className="text-[11px] font-extrabold text-cyan-900 block mb-1">Start (X, Y)</label>
