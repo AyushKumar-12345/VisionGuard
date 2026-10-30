@@ -4,10 +4,12 @@ from ultralytics import YOLO
 from app.core.config import settings
 from app.core.logging import logger
 
-# COCO vehicle class IDs for traffic analytics:
-# 2: car, 3: motorcycle, 5: bus, 7: truck
-TRAFFIC_CLASS_IDS = [2, 3, 5, 7]
+# COCO class IDs for intelligent surveillance & multi-object analytics:
+# 0: person (pedestrians, athletes, subjects), 1: bicycle, 2: car, 3: motorcycle, 5: bus, 7: truck
+TRAFFIC_CLASS_IDS = [0, 1, 2, 3, 5, 7]
 TRAFFIC_CLASS_NAMES = {
+    0: "person",
+    1: "bicycle",
     2: "car",
     3: "motorcycle",
     5: "bus",

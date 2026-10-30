@@ -3,13 +3,15 @@ import numpy as np
 
 from app.services.cv.line_counter import LineSegment
 
-# Distinct high-contrast color palette for vehicle classes (BGR format for OpenCV)
+# Distinct high-contrast color palette for detected classes (BGR format for OpenCV)
 CLASS_COLORS = {
+    "person": (235, 87, 87),      # Coral Pink
+    "bicycle": (0, 215, 255),     # Cyan / Gold
     "car": (245, 130, 49),        # Blue / Teal
-    "motorcycle": (60, 180, 75),   # Green
-    "bus": (230, 25, 75),          # Red / Coral
-    "truck": (145, 30, 180),       # Purple / Magenta
-    "default": (200, 200, 200),    # Slate
+    "motorcycle": (60, 180, 75),  # Green
+    "bus": (230, 25, 75),         # Red
+    "truck": (145, 30, 180),      # Purple / Magenta
+    "default": (200, 200, 200),   # Slate
 }
 
 
